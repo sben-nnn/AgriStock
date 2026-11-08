@@ -31,6 +31,14 @@ public class DynamicArray<T> implements Iterable<T> {
     public boolean isEmpty() { return size == 0; }
     public void clear() { data = new Object[16]; size = 0; }
 
+    // Return a copy of all items as an array
+    @SuppressWarnings("unchecked")
+    public T[] toSortedArray() {
+        T[] out = (T[]) new Object[size];
+        for (int i = 0; i < size; i++) out[i] = (T) data[i];
+        return out;
+    }
+
     @Override
     public Iterator<T> iterator() {
         return new Iterator<>() {
