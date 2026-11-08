@@ -3,7 +3,6 @@ package com.agristock.ds;
 import java.util.Comparator;
 import java.util.function.ToLongFunction;
 
-/** Array algorithms for Reports & Analytics (M13): merge sort and binary search. */
 public final class Sorts {
     private Sorts() {}
 
@@ -34,7 +33,6 @@ public final class Sorts {
         while (j < n2) a.set(k++, (T) R[j++]);
     }
 
-    /** First index whose key is >= target in an array sorted ascending by key (or size() if none). */
     public static <T> int lowerBound(DynamicArray<T> a, long target, ToLongFunction<T> key) {
         int low = 0, high = a.size() - 1, result = a.size();
         while (low <= high) {
@@ -45,7 +43,6 @@ public final class Sorts {
         return result;
     }
 
-    /** First index whose key is > target (end boundary of a date range). */
     public static <T> int upperBound(DynamicArray<T> a, long target, ToLongFunction<T> key) {
         return lowerBound(a, target + 1, key);
     }
