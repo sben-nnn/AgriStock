@@ -23,11 +23,11 @@ public class ReportService {
     }
 
     public double[] yieldsFor(String crop, boolean demand) {
-        int n = 0;
-        for (YieldRecord y : sys.yields) if (y.crop.equalsIgnoreCase(crop)) n++;
-        double[] out = new double[n];
-        int i = 0;
-        for (YieldRecord y : sys.yields) if (y.crop.equalsIgnoreCase(crop)) out[i++] = demand ? y.demand : y.yield;
+        DynamicArray<Double> tmp = new DynamicArray<>();
+        for (YieldRecord y : sys.yields)
+            if (y.crop.equalsIgnoreCase(crop)) tmp.add(demand ? y.demand : y.yield);
+        double[] out = new double[tmp.size()];
+        for (int i = 0; i < tmp.size(); i++) out[i] = tmp.get(i);
         return out;
     }
 
