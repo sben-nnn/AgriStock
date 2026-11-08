@@ -1,4 +1,5 @@
 package com.agristock.service;
 
-public class ReportService {
-}
+public class ReportService { }
+
+
