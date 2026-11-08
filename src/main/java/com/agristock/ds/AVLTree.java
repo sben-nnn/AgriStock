@@ -79,7 +79,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         x.height = 1 + Math.max(h(x.left), h(x.right));
         return x;
     }
-    
+
     private Node rotateLeft(Node x) {
         Node y = x.right, t = y.left;
         y.left = x; x.right = t;
