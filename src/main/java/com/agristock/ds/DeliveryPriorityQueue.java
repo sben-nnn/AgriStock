@@ -1,9 +1,8 @@
 package com.agristock.ds;
 
 import com.agristock.model.Models.Delivery;
-import java.util.Comparator;
 
-/** Priority queue for deliveries. Lower urgency number = higher priority. */
+// Priority queue for deliveries. Lower urgency number = higher priority.
 public class DeliveryPriorityQueue {
     private Delivery[] heap = new Delivery[16];
     private int size;
@@ -25,7 +24,7 @@ public class DeliveryPriorityQueue {
         }
     }
 
-    /** Remove and return the highest-priority delivery. */
+    // Remove and return the highest-priority delivery.
     public Delivery poll() {
         if (size == 0) return null;
         Delivery top = heap[0];
@@ -43,7 +42,7 @@ public class DeliveryPriorityQueue {
         return top;
     }
 
-    /** See the highest-priority delivery without removing it. */
+    // See the highest-priority delivery without removing it.
     public Delivery peek() { return size == 0 ? null : heap[0]; }
 
     public int size() { return size; }
