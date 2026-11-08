@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 public class MainApp extends Application {
     private Stage stage;
 
+    // Application entry point: sets up the stage and shows the login screen.
     @Override
     public void start(Stage primary) {
         stage = primary;
@@ -18,7 +19,7 @@ public class MainApp extends Application {
         stage.show();
     }
 
-    // login UI
+    // Builds and displays the login UI.
     private void showLogin() {
         Label title = new Label("AgriStock");
         Label sub = new Label("Agricultural Stock Management System");
@@ -36,6 +37,6 @@ public class MainApp extends Application {
         user.requestFocus();
     }
 
-    // launches the app
+    // Launches the JavaFX application.
     public static void main(String[] args) { launch(args); }
 }
