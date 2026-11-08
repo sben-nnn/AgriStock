@@ -12,9 +12,12 @@ public class AVLTree<K extends Comparable<K>, V> {
     private int size;
     private boolean inserted;
 
+
     public int size() { return size; }
+
     public int height() { return h(root); }
 
+    // Inserts a key/value pair and rebalances
     public boolean insert(K key, V value) {
         inserted = false;
         root = insert(root, key, value);
@@ -37,6 +40,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         return n;
     }
 
+    // Returns value for key
     public V search(K key) {
         Node cur = root;
         while (cur != null) {
@@ -47,6 +51,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         return null;
     }
 
+    // goes to all values in ascending key order.
     public void inOrder(Consumer<V> visitor) { inOrder(root, visitor); }
 
     private void inOrder(Node n, Consumer<V> visitor) {
@@ -56,6 +61,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         inOrder(n.right, visitor);
     }
 
+    // returns all values sorted ascending by key
     public DynamicArray<V> toSortedArray() {
         DynamicArray<V> out = new DynamicArray<>();
         inOrder(out::add);
@@ -63,6 +69,7 @@ public class AVLTree<K extends Comparable<K>, V> {
     }
 
     private int h(Node n) { return n == null ? 0 : n.height; }
+
     private int balance(Node n) { return n == null ? 0 : h(n.left) - h(n.right); }
 
     private Node rotateRight(Node y) {
@@ -72,7 +79,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         x.height = 1 + Math.max(h(x.left), h(x.right));
         return x;
     }
-
+    
     private Node rotateLeft(Node x) {
         Node y = x.right, t = y.left;
         y.left = x; x.right = t;
