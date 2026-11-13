@@ -3,6 +3,7 @@ package com.agristock.ds;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/** Growable array (Array data structure) used by Forecasting (M12) and Reports (M13). */
 public class DynamicArray<T> implements Iterable<T> {
     private Object[] data = new Object[16];
     private int size;
@@ -30,14 +31,6 @@ public class DynamicArray<T> implements Iterable<T> {
     public int size() { return size; }
     public boolean isEmpty() { return size == 0; }
     public void clear() { data = new Object[16]; size = 0; }
-
-    // Return a copy of all items as an array
-    @SuppressWarnings("unchecked")
-    public T[] toSortedArray() {
-        T[] out = (T[]) new Object[size];
-        for (int i = 0; i < size; i++) out[i] = (T) data[i];
-        return out;
-    }
 
     @Override
     public Iterator<T> iterator() {

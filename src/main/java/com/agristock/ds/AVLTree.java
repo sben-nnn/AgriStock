@@ -2,6 +2,7 @@ package com.agristock.ds;
 
 import java.util.function.Consumer;
 
+/** Self-balancing AVL tree keyed by K. Used for users (M1), batches (M3) and stock (M7). */
 public class AVLTree<K extends Comparable<K>, V> {
     private class Node {
         K key; V value; int height = 1; Node left, right;
@@ -12,12 +13,10 @@ public class AVLTree<K extends Comparable<K>, V> {
     private int size;
     private boolean inserted;
 
-
     public int size() { return size; }
-
     public int height() { return h(root); }
 
-    // Inserts a key/value pair and rebalances
+    /** AVL insert. Returns false (and changes nothing) if the key already exists. */
     public boolean insert(K key, V value) {
         inserted = false;
         root = insert(root, key, value);
@@ -40,7 +39,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         return n;
     }
 
-    // Returns value for key
+    /** Iterative binary search: O(log n). Returns null if not found. */
     public V search(K key) {
         Node cur = root;
         while (cur != null) {
@@ -51,7 +50,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         return null;
     }
 
-    // goes to all values in ascending key order.
+    /** In-order traversal: visits values in ascending key order. */
     public void inOrder(Consumer<V> visitor) { inOrder(root, visitor); }
 
     private void inOrder(Node n, Consumer<V> visitor) {
@@ -61,7 +60,6 @@ public class AVLTree<K extends Comparable<K>, V> {
         inOrder(n.right, visitor);
     }
 
-    // returns all values sorted ascending by key
     public DynamicArray<V> toSortedArray() {
         DynamicArray<V> out = new DynamicArray<>();
         inOrder(out::add);
@@ -69,7 +67,6 @@ public class AVLTree<K extends Comparable<K>, V> {
     }
 
     private int h(Node n) { return n == null ? 0 : n.height; }
-
     private int balance(Node n) { return n == null ? 0 : h(n.left) - h(n.right); }
 
     private Node rotateRight(Node y) {
