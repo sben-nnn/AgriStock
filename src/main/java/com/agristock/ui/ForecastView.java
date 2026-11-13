@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import java.util.ArrayList;
 import java.util.List;
 
+/** MODULE 12: Forecasting (array + moving average). */
 public class ForecastView extends View {
     private final TableView<YieldRecord> table = UI.table();
     private final ComboBox<String> crop = new ComboBox<>();

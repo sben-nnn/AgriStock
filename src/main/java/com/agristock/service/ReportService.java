@@ -10,6 +10,7 @@ import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
+/** MODULE 12 (Forecasting: array + moving average) and MODULE 13 (Reports: array, merge sort, binary search). */
 public class ReportService {
     private final AgriStockSystem sys;
     public ReportService(AgriStockSystem sys) { this.sys = sys; }
@@ -23,14 +24,15 @@ public class ReportService {
     }
 
     public double[] yieldsFor(String crop, boolean demand) {
-        DynamicArray<Double> tmp = new DynamicArray<>();
-        for (YieldRecord y : sys.yields)
-            if (y.crop.equalsIgnoreCase(crop)) tmp.add(demand ? y.demand : y.yield);
-        double[] out = new double[tmp.size()];
-        for (int i = 0; i < tmp.size(); i++) out[i] = tmp.get(i);
+        int n = 0;
+        for (YieldRecord y : sys.yields) if (y.crop.equalsIgnoreCase(crop)) n++;
+        double[] out = new double[n];
+        int i = 0;
+        for (YieldRecord y : sys.yields) if (y.crop.equalsIgnoreCase(crop)) out[i++] = demand ? y.demand : y.yield;
         return out;
     }
 
+    /** Moving average over the last 'window' seasons. */
     public static double movingAverage(double[] data, int window) {
         if (window <= 0 || data.length < window)
             throw new AgriException("Insufficient historical data points for a window of " + window + " seasons.");
@@ -85,6 +87,7 @@ public class ReportService {
         return a;
     }
 
+    /** Merge sort by date, binary search for the date range boundaries, then crop/farm/batch filters. */
     public DynamicArray<ReportEntry> generateReport(String type, String crop, String farm, String batchId, LocalDate from, LocalDate to) {
         if (!sys.checkPermission(Feature.REPORTS)) throw new AgriException("Access denied for your role.");
         DynamicArray<ReportEntry> all = raw(type);
