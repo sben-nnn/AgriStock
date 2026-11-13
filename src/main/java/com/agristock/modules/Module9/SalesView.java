@@ -10,5 +10,5 @@ public class SalesView extends View {
 
     @Override public String title() { return "9  Sales"; }
     @Override public Feature feature() { return Feature.SALES; }
-    @Override public void refresh() { getChildren().clear(); header("Sales & Stock Release", "Create sales orders and confirm them from the FIFO queue."); }
+    @Override public void refresh() { getChildren().clear(); header("Sales & Stock Release", ""); }
 }
