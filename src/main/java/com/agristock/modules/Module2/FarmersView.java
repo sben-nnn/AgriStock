@@ -35,9 +35,9 @@ public class FarmersView extends View {
 
         UI.Form h = new UI.Form();
         h.add("Farmer ID", farmerSelect);
-        h.add("Crop", harvestCrop = h.text("Crop"));
-        h.add("Qty (kg)", harvestQty = h.text("Qty (kg)"));
-        h.add("Date", harvestDate = h.text("Date (YYYY-MM-DD)"));
+        harvestCrop = h.text("Crop");
+        harvestQty = h.text("Qty (kg)");
+        harvestDate = h.text("Date (YYYY-MM-DD)");
         h.wide(UI.btn("Record Harvest", "secondary", this::recordHarvest));
 
         UI.col(farmerTable, "ID", fr -> fr.id);
