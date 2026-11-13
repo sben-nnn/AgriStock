@@ -66,7 +66,7 @@ public class HarvestStockView extends View {
 
     @Override public void refresh() {
         List<String> bids = new ArrayList<>();
-        for (Batch b : sys.batches) bids.add(b.batchId);
+        for (Batch b : sys.batches.toSortedArray()) bids.add(b.batchId);
         UI.setItems(batchSelect, bids);
 
         List<StockRecord> records = new ArrayList<>();
