@@ -10,5 +10,5 @@ public class ReportsView extends View {
 
     @Override public String title() { return "13  Reports & Analytics"; }
     @Override public Feature feature() { return Feature.REPORTS; }
-    @Override public void refresh() { getChildren().clear(); header("Reports & Analytics", "Generate reports and view analytics."); }
+    @Override public void refresh() { getChildren().clear(); header("Reports & Analytics", ""); }
 }
