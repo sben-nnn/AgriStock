@@ -1,7 +1,7 @@
 package com.agristock.modules.Module8;
 
 import com.agristock.model.Models.StockItem;
-import com.agristock.model.Models.AgriException;
+import com.agristock.model.AgriException;
 import com.agristock.ds.DynamicArray;
 import java.time.LocalDate;
 
