@@ -7,5 +7,5 @@ public class DashboardView extends View {
     public DashboardView(Ctx ctx) { super(ctx); }
     @Override public String title() { return "0  Dashboard"; }
     @Override public Feature feature() { return null; }
-    @Override public void refresh() { getChildren().clear(); header("Dashboard", "Welcome, " + sys.session.fullName + " (" + sys.session.role + ")."); }
+    @Override public void refresh() { getChildren().clear(); header("Dashboard", ""); }
 }
