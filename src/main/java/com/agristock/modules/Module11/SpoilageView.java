@@ -10,5 +10,5 @@ public class SpoilageView extends View {
 
     @Override public String title() { return "11  Spoilage & Loss"; }
     @Override public Feature feature() { return Feature.SPOILAGE_LOG; }
-    @Override public void refresh() { getChildren().clear(); header("Spoilage & Loss", "Log spoilage, approve/reject adjustments, track financial loss."); }
+    @Override public void refresh() { getChildren().clear(); header("Spoilage & Loss", ""); }
 }
