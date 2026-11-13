@@ -3,7 +3,6 @@ package com.agristock.modules.Module11;
 import com.agristock.model.Models.Spoilage;
 import com.agristock.service.AgriStockSystem;
 
-/** MODULE 11: Spoilage, Loss & Adjustments service (append-only linked list). */
 public class SpoilageService {
     private final AgriStockSystem sys;
     public SpoilageService(AgriStockSystem sys) { this.sys = sys; }

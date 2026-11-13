@@ -4,7 +4,6 @@ import com.agristock.model.Models.YieldRecord;
 import com.agristock.service.AgriStockSystem;
 import com.agristock.service.ReportService;
 
-/** MODULE 12: Forecasting service (array + moving average). */
 public class ForecastService {
     private final AgriStockSystem sys;
     private final ReportService rep;

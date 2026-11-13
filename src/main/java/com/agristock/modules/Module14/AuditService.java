@@ -5,7 +5,6 @@ import com.agristock.service.AgriStockSystem;
 
 import java.util.List;
 
-/** MODULE 14: Inventory Audit & Validation service (append-only linked list + linear search). */
 public class AuditService {
     private final AgriStockSystem sys;
     public AuditService(AgriStockSystem sys) { this.sys = sys; }
