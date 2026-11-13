@@ -27,12 +27,12 @@ public class HarvestStockView extends View {
         header("4 - Harvest Stock Recording", "Record harvested stock quantities and quality. Stock records use a linked list; lookup uses linear search.");
         UI.Form f = new UI.Form();
         f.add("Batch ID", batchSelect);
-        f.add("Harvested Qty (kg)", harvestedQty = f.text("Harvested Qty (kg)"));
-        f.add("Rejected Qty (kg)", rejectedQty = f.text("Rejected Qty (kg)"));
-        f.add("Grade", grade = f.text("Grade"));
-        f.add("Ripeness", ripeness = f.text("Ripeness"));
-        f.add("Moisture (%)", moisture = f.text("Moisture (%)"));
-        f.add("Reject Reason", rejectReason = f.text("Reject Reason"));
+        harvestedQty = f.text("Harvested Qty (kg)");
+        rejectedQty = f.text("Rejected Qty (kg)");
+        grade = f.text("Grade");
+        ripeness = f.text("Ripeness");
+        moisture = f.text("Moisture (%)");
+        rejectReason = f.text("Reject Reason");
         f.wide(UI.btn("Record Stock", "primary", this::recordStock));
 
         UI.col(recordTable, "Batch ID", r -> r.batchId);
