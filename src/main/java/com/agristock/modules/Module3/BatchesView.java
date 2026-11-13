@@ -32,7 +32,7 @@ public class BatchesView extends View {
     public BatchesView(Ctx ctx) { super(ctx); build(); }
 
     private void build() {
-        header("3 - Farm, Crop & Batch Registration", "Register farms and crops, then create harvest batches. Batches are stored in an AVL tree keyed by batch ID.");
+        header("3 - Farm, Crop & Batch Registration", "");
         UI.Form f1 = new UI.Form();
         farmId = f1.text("Farm ID");
         farmName = f1.text("Name");
