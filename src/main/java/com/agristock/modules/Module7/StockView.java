@@ -10,5 +10,5 @@ public class StockView extends View {
 
     @Override public String title() { return "7  Stock"; }
     @Override public Feature feature() { return Feature.STOCK_EDIT; }
-    @Override public void refresh() { getChildren().clear(); header("Stock Monitoring", "Monitor stock levels, low stock, aging, and expiry flags."); }
+    @Override public void refresh() { getChildren().clear(); header("Stock Monitoring", ""); }
 }
