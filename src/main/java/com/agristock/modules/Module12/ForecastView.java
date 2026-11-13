@@ -10,5 +10,5 @@ public class ForecastView extends View {
 
     @Override public String title() { return "12  Forecasting"; }
     @Override public Feature feature() { return Feature.FORECAST; }
-    @Override public void refresh() { getChildren().clear(); header("Forecasting", "Historical yields and moving average seed need calculation."); }
+    @Override public void refresh() { getChildren().clear(); header("Forecasting", ""); }
 }
