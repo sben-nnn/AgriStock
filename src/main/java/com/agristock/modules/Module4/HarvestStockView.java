@@ -24,7 +24,7 @@ public class HarvestStockView extends View {
     public HarvestStockView(Ctx ctx) { super(ctx); build(); }
 
     private void build() {
-        header("4 - Harvest Stock Recording", "Record harvested stock quantities and quality. Stock records use a linked list; lookup uses linear search.");
+        header("4 - Harvest Stock Recording", "");
         UI.Form f = new UI.Form();
         f.add("Batch ID", batchSelect);
         harvestedQty = f.text("Harvested Qty (kg)");
