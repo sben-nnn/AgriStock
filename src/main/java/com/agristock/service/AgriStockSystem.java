@@ -125,9 +125,7 @@ public class AgriStockSystem {
 
     public void logTransaction(String type, String ref, String note) { logAuditTrail(type, ref, 0, 0, note); }
 
-    // =====================================================================
     // MODULE 2: Farmer Tracking (Linked List + Linear Search)
-    // =====================================================================
     public Farmer findFarmer(String id) { return farmers.linearSearch(f -> f.id.equalsIgnoreCase(id)); }
 
     public void registerFarmer(String id, String name, String contact) {
@@ -150,9 +148,7 @@ public class AgriStockSystem {
         logTransaction("FARMER_HARVEST", farmerId, qty + " kg of " + crop);
     }
 
-    // =====================================================================
     // MODULE 3: Farm, Crop & Harvest Batch Registration (AVL Tree by batch ID)
-    // =====================================================================
     public static final String[] UNITS = {"kg", "g", "lb", "ton", "sack (50 kg)"};
 
     public static double convertUnit(double qty, String unit) {
@@ -226,9 +222,7 @@ public class AgriStockSystem {
 
     public Farm farmOfBatch(Batch b) { return findFarm(b.farmId); }
 
-    // =====================================================================
     // MODULE 4: Harvest Stock Recording (Linked List + Linear Search)
-    // =====================================================================
     public StockRecord findStockRecord(String batchId) { return stockRecords.linearSearch(r -> r.batchId.equals(batchId)); }
 
     public void validateQuantity(double harvested, double rejected, double moisture) {
@@ -269,9 +263,7 @@ public class AgriStockSystem {
         r.rejectedQty += qty; r.saleableQty -= qty; r.rejectReason = reason;
     }
 
-    // =====================================================================
     // MODULE 5: Quality Inspection & Grading (Queue, FIFO scheduling)
-    // =====================================================================
     public void enqueueForInspection(Batch b) {
         b.status = BatchStatus.AWAITING_INSPECTION;
         inspectionQueue.enqueue(b);
@@ -306,9 +298,7 @@ public class AgriStockSystem {
         if (s.remaining > 0) expiryHeap.insert(s);
     }
 
-    // =====================================================================
     // MODULE 6: Storage & Location Management (Array + FIFO Queue rotation)
-    // =====================================================================
     public StorageEntry assignLocation(String itemId, int locationIndex, double qty, LocalDate date, String conditions) {
         require(Feature.STORAGE);
         if (locationIndex < 0 || locationIndex >= locations.length) throw new AgriException("Invalid storage location.");
@@ -345,9 +335,7 @@ public class AgriStockSystem {
         return oldest;
     }
 
-    // =====================================================================
     // MODULE 7: Stock Monitoring & Control (AVL Tree, in-order traversal, binary search)
-    // =====================================================================
     public StockItem addItem(String itemId, String crop, String category, double qty, LocalDate expiry, double unitValue) {
         require(Feature.STOCK_EDIT);
         if (itemId.trim().isEmpty() || crop.trim().isEmpty() || category == null) throw new AgriException("Item ID, crop and category are required.");
@@ -435,9 +423,7 @@ public class AgriStockSystem {
         logAuditTrail("ADJUSTMENT", itemId, qty, 0, "Reservation released");
     }
 
-    // =====================================================================
     // MODULE 8: Expiry & Purge (Min-Heap, FEFO / extract-min)
-    // =====================================================================
     public void rebuildExpiryHeap() {
         expiryHeap.clear();
         stock.inOrder(s -> { if (s.remaining > 0) expiryHeap.insert(s); });
@@ -501,9 +487,7 @@ public class AgriStockSystem {
         return log;
     }
 
-    // =====================================================================
     // MODULE 9: Sales & Stock Release (Queue, FIFO processing)
-    // =====================================================================
     public boolean checkAvailability(StockItem s, double qty) {
         return s != null && qty > 0 && !s.expiryDate.isBefore(today()) && qty <= s.available() + 0.0001;
     }
@@ -570,9 +554,7 @@ public class AgriStockSystem {
                "Issued by: " + (session == null ? "-" : session.fullName) + "\nThank you for your purchase!\n";
     }
 
-    // =====================================================================
     // MODULE 10: Dispatch & Delivery Monitoring (Priority Queue, Earliest Deadline First)
-    // =====================================================================
     public Delivery scheduleDelivery(Sale sale, LocalDate deadline, String vehicle, String destination, int urgency) {
         require(Feature.DISPATCH);
         if (sale == null || !sale.status.equals("CONFIRMED") || sale.deliveryScheduled) throw new AgriException("Select a confirmed sale that has no delivery yet.");
@@ -621,9 +603,7 @@ public class AgriStockSystem {
         logAuditTrail("ADJUSTMENT", d.id, d.dispatchedQty, d.receivedQty, "Shortage of " + shortage + " kg reconciled as loss");
     }
 
-    // =====================================================================
     // MODULE 11: Spoilage, Loss & Adjustments (Linked List, append-only)
-    // =====================================================================
     private Spoilage newSpoilage(String itemId, double qty, String reason, String reporter) {
         Spoilage sp = new Spoilage();
         sp.id = String.format("SP-%04d", ++spoilageCounter);
@@ -677,9 +657,7 @@ public class AgriStockSystem {
         return sb.toString();
     }
 
-    // =====================================================================
     // MODULE 14: Inventory Audit & Validation (append-only Linked List, linear search)
-    // =====================================================================
     public void logAuditTrail(String type, String ref, double recorded, double physical, String note) {
         AuditEntry e = new AuditEntry();
         e.type = type; e.ref = ref; e.recorded = recorded; e.physical = physical; e.discrepancy = physical - recorded;
