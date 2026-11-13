@@ -19,7 +19,7 @@ import java.util.List;
 public class HarvestStockView extends View {
     private final TableView<StockRecord> recordTable = UI.table();
     private final ComboBox<String> batchSelect = new ComboBox<>();
-    private final TextField harvestedQty, rejectedQty, grade, ripeness, moisture, rejectReason;
+    private TextField harvestedQty, rejectedQty, grade, ripeness, moisture, rejectReason;
 
     public HarvestStockView(Ctx ctx) { super(ctx); build(); }
 
