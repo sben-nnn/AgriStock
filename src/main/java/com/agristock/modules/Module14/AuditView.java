@@ -10,5 +10,5 @@ public class AuditView extends View {
 
     @Override public String title() { return "14  Audit & Validation"; }
     @Override public Feature feature() { return Feature.AUDIT_VIEW; }
-    @Override public void refresh() { getChildren().clear(); header("Audit & Validation", "Compare physical counts with recorded stock."); }
+    @Override public void refresh() { getChildren().clear(); header("Audit & Validation", ""); }
 }
