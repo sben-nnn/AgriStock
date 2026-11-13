@@ -34,29 +34,29 @@ public class BatchesView extends View {
     private void build() {
         header("3 - Farm, Crop & Batch Registration", "Register farms and crops, then create harvest batches. Batches are stored in an AVL tree keyed by batch ID.");
         UI.Form f1 = new UI.Form();
-        f1.add("Farm ID", farmId = f1.text("Farm ID"));
-        f1.add("Name", farmName = f1.text("Name"));
-        f1.add("Location", farmLocation = f1.text("Location"));
+        farmId = f1.text("Farm ID");
+        farmName = f1.text("Name");
+        farmLocation = f1.text("Location");
         f1.wide(UI.btn("Register Farm", "primary", this::registerFarm));
 
         UI.Form f2 = new UI.Form();
-        f2.add("Crop Name", cropName = f2.text("Crop Name"));
-        f2.add("Variety", cropVariety = f2.text("Variety"));
-        f2.add("Category", cropCategory = f2.text("Category"));
+        cropName = f2.text("Crop Name");
+        cropVariety = f2.text("Variety");
+        cropCategory = f2.text("Category");
         f2.wide(UI.btn("Register Crop", "secondary", this::registerCrop));
 
         UI.Form f3 = new UI.Form();
-        f3.add("Batch ID", batchId = f3.text("Batch ID"));
+        batchId = f3.text("Batch ID");
         f3.add("Farm ID", farmSelect);
-        f3.add("Plot", batchPlot = f3.text("Plot"));
+        batchPlot = f3.text("Plot");
         f3.add("Crop", cropSelect);
-        f3.add("Variety", batchVariety = f3.text("Variety"));
-        f3.add("Worker", batchWorker = f3.text("Worker"));
-        f3.add("Farmer ID", batchFarmerId = f3.text("Farmer ID"));
-        f3.add("Harvest Date", batchHarvest = f3.text("YYYY-MM-DD"));
-        f3.add("Expiry Date", batchExpiry = f3.text("YYYY-MM-DD"));
-        f3.add("Qty", batchQty = f3.text("Qty"));
-        f3.add("Unit", batchUnit = f3.text("Unit"));
+        batchVariety = f3.text("Variety");
+        batchWorker = f3.text("Worker");
+        batchFarmerId = f3.text("Farmer ID");
+        batchHarvest = f3.text("Harvest Date");
+        batchExpiry = f3.text("Expiry Date");
+        batchQty = f3.text("Qty");
+        batchUnit = f3.text("Unit");
         batchUnit.setText("kg");
         f3.wide(UI.btn("Create Batch", "primary", this::createBatch));
 
