@@ -5,6 +5,7 @@ import com.agristock.model.Models.Batch;
 import com.agristock.model.Models.Crop;
 import com.agristock.model.Models.Feature;
 import com.agristock.model.Models.Farm;
+import com.agristock.ds.DynamicArray;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import com.agristock.ui.Ctx;
@@ -124,7 +125,7 @@ public class BatchesView extends View {
         for (Crop c : sys.crops) crops.add(c);
         UI.fill(cropTable, crops);
 
-        List<Batch> batches = sys.batches.toSortedArray();
+        DynamicArray<Batch> batches = sys.batches.toSortedArray();
         UI.fill(batchTable, batches);
 
         List<String> fids = new ArrayList<>();
