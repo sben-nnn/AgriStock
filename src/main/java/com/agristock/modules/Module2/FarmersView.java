@@ -28,9 +28,9 @@ public class FarmersView extends View {
     private void build() {
         header("2 - Farmer Tracking", "Register farmers and record their harvests. Harvest logs use a linked list; farmer lookup uses linear search.");
         UI.Form f = new UI.Form();
-        f.add("Farmer ID", farmerId = f.text("Farmer ID"));
-        f.add("Name", farmerName = f.text("Name"));
-        f.add("Contact", farmerContact = f.text("Contact"));
+        farmerId = f.text("Farmer ID");
+        farmerName = f.text("Name");
+        farmerContact = f.text("Contact");
         f.wide(UI.btn("Register Farmer", "primary", this::registerFarmer));
 
         UI.Form h = new UI.Form();
