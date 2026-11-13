@@ -11,13 +11,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Core business logic for modules 1-11 and 14. Every module uses the data structure
- * and algorithm promised in the project proposal.
- */
 public class AgriStockSystem {
 
-    // ---------- Data structures ----------
+    // Data structures
     public final AVLTree<String, User> users = new AVLTree<>();                       // M1
     public final SinglyLinkedList<AuditEntry> audit = new SinglyLinkedList<>();       // M1 log + M14 audit trail
     public final SinglyLinkedList<Farmer> farmers = new SinglyLinkedList<>();         // M2
@@ -47,9 +43,7 @@ public class AgriStockSystem {
 
     public LocalDate today() { return LocalDate.now(); }
 
-    // =====================================================================
     // MODULE 1: User & Role Management (AVL Tree keyed by username)
-    // =====================================================================
     public static String hash(String s) {
         try {
             byte[] d = MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8));
@@ -65,8 +59,7 @@ public class AgriStockSystem {
         users.insert("inventory", new User("inventory", hash("inventory123"), "Inventory Staff (default)", Role.INVENTORY));
         users.insert("sales", new User("sales", hash("sales123"), "Sales / Dispatch (default)", Role.SALES));
     }
-
-    /** Binary search in the AVL tree for authentication. */
+    
     public User login(String username, String password) {
         User u = users.search(username.trim());
         if (u == null) throw new AgriException("User not found.");
@@ -92,12 +85,12 @@ public class AgriStockSystem {
 
     public void addUser(String username, String fullName, String password, Role role) {
         require(Feature.USERS);
-        username = username.trim();
-        if (username.isEmpty() || fullName.trim().isEmpty() || password.isEmpty() || role == null)
+        String user = username.trim();
+        if (user.isEmpty() || fullName.trim().isEmpty() || password.isEmpty() || role == null)
             throw new AgriException("Username, full name, password and role are required.");
-        if (!users.insert(username, new User(username, hash(password), fullName.trim(), role)))
-            throw new AgriException("Username '" + username + "' already exists.");
-        logTransaction("USER_ADD", username, "Created user with role " + role.label);
+        if (!users.insert(user, new User(user, hash(password), fullName.trim(), role)))
+            throw new AgriException("Username '" + user + "' already exists.");
+        logTransaction("USER_ADD", user, "Created user with role " + role.label);
     }
 
     public void editUser(String username, String fullName, String newPassword) {
@@ -132,18 +125,16 @@ public class AgriStockSystem {
 
     public void logTransaction(String type, String ref, String note) { logAuditTrail(type, ref, 0, 0, note); }
 
-    // =====================================================================
     // MODULE 2: Farmer Tracking (Linked List + Linear Search)
-    // =====================================================================
     public Farmer findFarmer(String id) { return farmers.linearSearch(f -> f.id.equalsIgnoreCase(id)); }
 
     public void registerFarmer(String id, String name, String contact) {
         require(Feature.FARMERS);
-        id = id.trim();
-        if (id.isEmpty() || name.trim().isEmpty()) throw new AgriException("Farmer ID and name are required.");
-        if (findFarmer(id) != null) throw new AgriException("Farmer already exists in registry.");
-        farmers.addFirst(new Farmer(id, name.trim(), contact.trim()));
-        logTransaction("FARMER_ADD", id, "Registered farmer " + name);
+        String fid = id.trim();
+        if (fid.isEmpty() || name.trim().isEmpty()) throw new AgriException("Farmer ID and name are required.");
+        if (findFarmer(fid) != null) throw new AgriException("Farmer already exists in registry.");
+        farmers.addFirst(new Farmer(fid, name.trim(), contact.trim()));
+        logTransaction("FARMER_ADD", fid, "Registered farmer " + name);
     }
 
     public void recordHarvest(String farmerId, String crop, double qty, LocalDate date) {
@@ -157,9 +148,7 @@ public class AgriStockSystem {
         logTransaction("FARMER_HARVEST", farmerId, qty + " kg of " + crop);
     }
 
-    // =====================================================================
     // MODULE 3: Farm, Crop & Harvest Batch Registration (AVL Tree by batch ID)
-    // =====================================================================
     public static final String[] UNITS = {"kg", "g", "lb", "ton", "sack (50 kg)"};
 
     public static double convertUnit(double qty, String unit) {
@@ -196,7 +185,7 @@ public class AgriStockSystem {
         return c == null ? "Other" : c.category;
     }
 
-    /** Returns an error message, or null if the batch ID is valid and unused (AVL search). */
+    // Returns an error message, or null if the batch ID is valid and unused (AVL search).
     public String validateBatchID(String id) {
         if (id == null || id.trim().isEmpty()) return "Batch ID is required.";
         if (!id.trim().matches("[A-Za-z0-9\\-]+")) return "Batch ID may only contain letters, digits and hyphens.";
@@ -233,9 +222,7 @@ public class AgriStockSystem {
 
     public Farm farmOfBatch(Batch b) { return findFarm(b.farmId); }
 
-    // =====================================================================
     // MODULE 4: Harvest Stock Recording (Linked List + Linear Search)
-    // =====================================================================
     public StockRecord findStockRecord(String batchId) { return stockRecords.linearSearch(r -> r.batchId.equals(batchId)); }
 
     public void validateQuantity(double harvested, double rejected, double moisture) {
@@ -268,7 +255,7 @@ public class AgriStockSystem {
         return r;
     }
 
-    /** Moves produce from saleable to rejected on a stock record (only before inspection). */
+    // Moves produce from saleable to rejected on a stock record (only before inspection).
     public void recordRejectedStock(String batchId, double qty, String reason) {
         StockRecord r = findStockRecord(batchId);
         if (r == null) throw new AgriException("No stock record for batch " + batchId);
@@ -276,9 +263,7 @@ public class AgriStockSystem {
         r.rejectedQty += qty; r.saleableQty -= qty; r.rejectReason = reason;
     }
 
-    // =====================================================================
     // MODULE 5: Quality Inspection & Grading (Queue, FIFO scheduling)
-    // =====================================================================
     public void enqueueForInspection(Batch b) {
         b.status = BatchStatus.AWAITING_INSPECTION;
         inspectionQueue.enqueue(b);
@@ -313,9 +298,7 @@ public class AgriStockSystem {
         if (s.remaining > 0) expiryHeap.insert(s);
     }
 
-    // =====================================================================
     // MODULE 6: Storage & Location Management (Array + FIFO Queue rotation)
-    // =====================================================================
     public StorageEntry assignLocation(String itemId, int locationIndex, double qty, LocalDate date, String conditions) {
         require(Feature.STORAGE);
         if (locationIndex < 0 || locationIndex >= locations.length) throw new AgriException("Invalid storage location.");
@@ -341,7 +324,7 @@ public class AgriStockSystem {
         logAuditTrail("TRANSFER", e.batchId, e.qty, 0, "Storage conditions updated: " + e.conditions);
     }
 
-    /** FIFO rotation: the oldest stored lot is moved to the front for use, then re-queued at the back. */
+    // FIFO rotation: the oldest stored lot is moved to the front for use, then re-queued at the back.
     public StorageEntry rotateStockFIFO() {
         require(Feature.STORAGE);
         if (rotationQueue.isEmpty()) throw new AgriException("No stored batches to rotate.");
@@ -352,9 +335,7 @@ public class AgriStockSystem {
         return oldest;
     }
 
-    // =====================================================================
     // MODULE 7: Stock Monitoring & Control (AVL Tree, in-order traversal, binary search)
-    // =====================================================================
     public StockItem addItem(String itemId, String crop, String category, double qty, LocalDate expiry, double unitValue) {
         require(Feature.STOCK_EDIT);
         if (itemId.trim().isEmpty() || crop.trim().isEmpty() || category == null) throw new AgriException("Item ID, crop and category are required.");
@@ -442,9 +423,7 @@ public class AgriStockSystem {
         logAuditTrail("ADJUSTMENT", itemId, qty, 0, "Reservation released");
     }
 
-    // =====================================================================
     // MODULE 8: Expiry & Purge (Min-Heap, FEFO / extract-min)
-    // =====================================================================
     public void rebuildExpiryHeap() {
         expiryHeap.clear();
         stock.inOrder(s -> { if (s.remaining > 0) expiryHeap.insert(s); });
@@ -475,7 +454,7 @@ public class AgriStockSystem {
         for (Sale s : toCancel) { pendingSales.remove(s); s.status = "CANCELLED"; }
     }
 
-    /** FEFO dispatch: always takes stock from the earliest-expiring batch first. */
+    // FEFO dispatch: always takes stock from the earliest-expiring batch first.
     public List<String> dispatchFEFO(String cropFilter, double qty) {
         require(Feature.EXPIRY);
         if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
@@ -508,9 +487,7 @@ public class AgriStockSystem {
         return log;
     }
 
-    // =====================================================================
     // MODULE 9: Sales & Stock Release (Queue, FIFO processing)
-    // =====================================================================
     public boolean checkAvailability(StockItem s, double qty) {
         return s != null && qty > 0 && !s.expiryDate.isBefore(today()) && qty <= s.available() + 0.0001;
     }
@@ -532,7 +509,7 @@ public class AgriStockSystem {
         return sale;
     }
 
-    /** Confirms the order at the front of the FIFO queue; stock is reduced only now. */
+    // Confirms the order at the front of the FIFO queue; stock is reduced only now.
     public Sale confirmSale() {
         require(Feature.SALES);
         if (pendingSales.isEmpty()) throw new AgriException("No pending sales orders.");
@@ -577,9 +554,7 @@ public class AgriStockSystem {
                "Issued by: " + (session == null ? "-" : session.fullName) + "\nThank you for your purchase!\n";
     }
 
-    // =====================================================================
     // MODULE 10: Dispatch & Delivery Monitoring (Priority Queue, Earliest Deadline First)
-    // =====================================================================
     public Delivery scheduleDelivery(Sale sale, LocalDate deadline, String vehicle, String destination, int urgency) {
         require(Feature.DISPATCH);
         if (sale == null || !sale.status.equals("CONFIRMED") || sale.deliveryScheduled) throw new AgriException("Select a confirmed sale that has no delivery yet.");
@@ -598,7 +573,7 @@ public class AgriStockSystem {
 
     public DynamicArray<Delivery> getUpcomingDeliveries() { return deliveryQueue.sortedSnapshot(); }
 
-    /** Dispatches the delivery with the earliest deadline (heap root). */
+    // Dispatches the delivery with the earliest deadline (heap root).
     public Delivery recordDispatch() {
         require(Feature.DISPATCH);
         if (deliveryQueue.isEmpty()) throw new AgriException("No scheduled deliveries.");
@@ -628,9 +603,7 @@ public class AgriStockSystem {
         logAuditTrail("ADJUSTMENT", d.id, d.dispatchedQty, d.receivedQty, "Shortage of " + shortage + " kg reconciled as loss");
     }
 
-    // =====================================================================
     // MODULE 11: Spoilage, Loss & Adjustments (Linked List, append-only)
-    // =====================================================================
     private Spoilage newSpoilage(String itemId, double qty, String reason, String reporter) {
         Spoilage sp = new Spoilage();
         sp.id = String.format("SP-%04d", ++spoilageCounter);
@@ -639,7 +612,7 @@ public class AgriStockSystem {
         return sp;
     }
 
-    /** requestAdjustment: logs the loss; authorised users (owner/manager) approve immediately. */
+    // requestAdjustment: logs the loss; authorised users (owner/manager) approve immediately.
     public Spoilage recordSpoilage(String itemId, double qty, String reason, String reporter) {
         require(Feature.SPOILAGE_LOG);
         StockItem s = mustFindStock(itemId);
@@ -671,7 +644,7 @@ public class AgriStockSystem {
 
     public void logFinancialLoss(Spoilage sp, StockItem s) { sp.lossValue = sp.qty * s.unitValue; }
 
-    /** Linear traversal of the list from the head, aggregating approved losses. */
+    // Linear traversal of the list from the head, aggregating approved losses.
     public String getFinancialLossReport() {
         StringBuilder sb = new StringBuilder("FINANCIAL LOSS REPORT (approved entries)\n----------------------------------------\n");
         double qty = 0, value = 0;
@@ -684,9 +657,7 @@ public class AgriStockSystem {
         return sb.toString();
     }
 
-    // =====================================================================
     // MODULE 14: Inventory Audit & Validation (append-only Linked List, linear search)
-    // =====================================================================
     public void logAuditTrail(String type, String ref, double recorded, double physical, String note) {
         AuditEntry e = new AuditEntry();
         e.type = type; e.ref = ref; e.recorded = recorded; e.physical = physical; e.discrepancy = physical - recorded;
@@ -721,7 +692,7 @@ public class AgriStockSystem {
         logAuditTrail("AUDIT_RECONCILE", itemId, recorded, physical, note.isBlank() ? "Count reconciled" : note.trim());
     }
 
-    /** Rejects impossible stock movements and logs them in the audit trail. */
+    // Rejects impossible stock movements and logs them in the audit trail.
     public void validateStockMovement(StockItem s, double qty, String type) {
         String err = null;
         if (qty <= 0) err = "Quantity must be greater than zero.";
@@ -733,7 +704,7 @@ public class AgriStockSystem {
         }
     }
 
-    /** Linear search through the audit trail for one batch/reference. */
+    // Linear search through the audit trail for one batch/reference.
     public List<AuditEntry> auditHistory(String ref) {
         List<AuditEntry> out = new ArrayList<>();
         for (AuditEntry e : audit) if (ref == null || ref.isBlank() || e.ref.equalsIgnoreCase(ref.trim())) out.add(e);
