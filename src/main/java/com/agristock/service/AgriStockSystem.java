@@ -11,13 +11,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Core business logic for modules 1-11 and 14. Every module uses the data structure
- * and algorithm promised in the project proposal.
- */
 public class AgriStockSystem {
 
-    // ---------- Data structures ----------
+    // Data structures
     public final AVLTree<String, User> users = new AVLTree<>();                       // M1
     public final SinglyLinkedList<AuditEntry> audit = new SinglyLinkedList<>();       // M1 log + M14 audit trail
     public final SinglyLinkedList<Farmer> farmers = new SinglyLinkedList<>();         // M2
@@ -47,9 +43,7 @@ public class AgriStockSystem {
 
     public LocalDate today() { return LocalDate.now(); }
 
-    // =====================================================================
     // MODULE 1: User & Role Management (AVL Tree keyed by username)
-    // =====================================================================
     public static String hash(String s) {
         try {
             byte[] d = MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8));
@@ -65,8 +59,7 @@ public class AgriStockSystem {
         users.insert("inventory", new User("inventory", hash("inventory123"), "Inventory Staff (default)", Role.INVENTORY));
         users.insert("sales", new User("sales", hash("sales123"), "Sales / Dispatch (default)", Role.SALES));
     }
-
-    /** Binary search in the AVL tree for authentication. */
+    
     public User login(String username, String password) {
         User u = users.search(username.trim());
         if (u == null) throw new AgriException("User not found.");
@@ -196,7 +189,7 @@ public class AgriStockSystem {
         return c == null ? "Other" : c.category;
     }
 
-    /** Returns an error message, or null if the batch ID is valid and unused (AVL search). */
+    // Returns an error message, or null if the batch ID is valid and unused (AVL search).
     public String validateBatchID(String id) {
         if (id == null || id.trim().isEmpty()) return "Batch ID is required.";
         if (!id.trim().matches("[A-Za-z0-9\\-]+")) return "Batch ID may only contain letters, digits and hyphens.";
@@ -268,7 +261,7 @@ public class AgriStockSystem {
         return r;
     }
 
-    /** Moves produce from saleable to rejected on a stock record (only before inspection). */
+    // Moves produce from saleable to rejected on a stock record (only before inspection).
     public void recordRejectedStock(String batchId, double qty, String reason) {
         StockRecord r = findStockRecord(batchId);
         if (r == null) throw new AgriException("No stock record for batch " + batchId);
@@ -341,7 +334,7 @@ public class AgriStockSystem {
         logAuditTrail("TRANSFER", e.batchId, e.qty, 0, "Storage conditions updated: " + e.conditions);
     }
 
-    /** FIFO rotation: the oldest stored lot is moved to the front for use, then re-queued at the back. */
+    // FIFO rotation: the oldest stored lot is moved to the front for use, then re-queued at the back.
     public StorageEntry rotateStockFIFO() {
         require(Feature.STORAGE);
         if (rotationQueue.isEmpty()) throw new AgriException("No stored batches to rotate.");
@@ -475,7 +468,7 @@ public class AgriStockSystem {
         for (Sale s : toCancel) { pendingSales.remove(s); s.status = "CANCELLED"; }
     }
 
-    /** FEFO dispatch: always takes stock from the earliest-expiring batch first. */
+    // FEFO dispatch: always takes stock from the earliest-expiring batch first.
     public List<String> dispatchFEFO(String cropFilter, double qty) {
         require(Feature.EXPIRY);
         if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
@@ -532,7 +525,7 @@ public class AgriStockSystem {
         return sale;
     }
 
-    /** Confirms the order at the front of the FIFO queue; stock is reduced only now. */
+    // Confirms the order at the front of the FIFO queue; stock is reduced only now.
     public Sale confirmSale() {
         require(Feature.SALES);
         if (pendingSales.isEmpty()) throw new AgriException("No pending sales orders.");
@@ -598,7 +591,7 @@ public class AgriStockSystem {
 
     public DynamicArray<Delivery> getUpcomingDeliveries() { return deliveryQueue.sortedSnapshot(); }
 
-    /** Dispatches the delivery with the earliest deadline (heap root). */
+    // Dispatches the delivery with the earliest deadline (heap root).
     public Delivery recordDispatch() {
         require(Feature.DISPATCH);
         if (deliveryQueue.isEmpty()) throw new AgriException("No scheduled deliveries.");
@@ -639,7 +632,7 @@ public class AgriStockSystem {
         return sp;
     }
 
-    /** requestAdjustment: logs the loss; authorised users (owner/manager) approve immediately. */
+    // requestAdjustment: logs the loss; authorised users (owner/manager) approve immediately.
     public Spoilage recordSpoilage(String itemId, double qty, String reason, String reporter) {
         require(Feature.SPOILAGE_LOG);
         StockItem s = mustFindStock(itemId);
@@ -671,7 +664,7 @@ public class AgriStockSystem {
 
     public void logFinancialLoss(Spoilage sp, StockItem s) { sp.lossValue = sp.qty * s.unitValue; }
 
-    /** Linear traversal of the list from the head, aggregating approved losses. */
+    // Linear traversal of the list from the head, aggregating approved losses.
     public String getFinancialLossReport() {
         StringBuilder sb = new StringBuilder("FINANCIAL LOSS REPORT (approved entries)\n----------------------------------------\n");
         double qty = 0, value = 0;
@@ -721,7 +714,7 @@ public class AgriStockSystem {
         logAuditTrail("AUDIT_RECONCILE", itemId, recorded, physical, note.isBlank() ? "Count reconciled" : note.trim());
     }
 
-    /** Rejects impossible stock movements and logs them in the audit trail. */
+    // Rejects impossible stock movements and logs them in the audit trail.
     public void validateStockMovement(StockItem s, double qty, String type) {
         String err = null;
         if (qty <= 0) err = "Quantity must be greater than zero.";
@@ -733,7 +726,7 @@ public class AgriStockSystem {
         }
     }
 
-    /** Linear search through the audit trail for one batch/reference. */
+    // Linear search through the audit trail for one batch/reference.
     public List<AuditEntry> auditHistory(String ref) {
         List<AuditEntry> out = new ArrayList<>();
         for (AuditEntry e : audit) if (ref == null || ref.isBlank() || e.ref.equalsIgnoreCase(ref.trim())) out.add(e);
