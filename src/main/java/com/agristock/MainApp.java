@@ -78,7 +78,7 @@ public class MainApp extends Application {
         Button login = new Button("Sign in"); login.getStyleClass().add("primary"); login.setMaxWidth(Double.MAX_VALUE); login.setDefaultButton(true);
         login.setOnAction(e -> {
             try { sys.login(user.getText(), pass.getText()); showMain(); }
-            catch (AgriException ex) { msg.setText(ex.getMessage()); pass.clear(); }
+            catch (Exception ex) { msg.setText(ex.getMessage()); pass.clear(); }
         });
         Label hint = UI.hint("Default accounts (first run): admin/admin123 \u2022 manager/manager123 \u2022 inventory/inventory123 \u2022 sales/sales123");
         VBox card = new VBox(12, title, sub, new Separator(), user, pass, login, msg, hint);
