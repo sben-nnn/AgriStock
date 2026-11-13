@@ -17,7 +17,7 @@ public class UsersView extends View {
     public UsersView(Ctx ctx) { super(ctx); build(); }
 
     private void build() {
-        header("1 - User & Role Management", "Add, edit, and manage user accounts. Role-based access controls what each user can do.");
+        header("1 - User & Role Management", "");
         UI.Form f = new UI.Form();
         username = f.text("Username");
         fullName = f.text("Full name");
