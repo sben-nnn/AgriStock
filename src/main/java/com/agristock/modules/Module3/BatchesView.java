@@ -23,10 +23,10 @@ public class BatchesView extends View {
     private final TableView<Batch> batchTable = UI.table();
     private final ComboBox<String> farmSelect = new ComboBox<>();
     private final ComboBox<String> cropSelect = new ComboBox<>();
-    private final TextField farmId, farmName, farmLocation;
-    private final TextField cropName, cropVariety, cropCategory;
-    private final TextField batchId, batchPlot, batchCrop, batchVariety, batchWorker, batchFarmerId;
-    private final TextField batchHarvest, batchExpiry, batchQty, batchUnit;
+    private TextField farmId, farmName, farmLocation;
+    private TextField cropName, cropVariety, cropCategory;
+    private TextField batchId, batchPlot, batchCrop, batchVariety, batchWorker, batchFarmerId;
+    private TextField batchHarvest, batchExpiry, batchQty, batchUnit;
 
     public BatchesView(Ctx ctx) { super(ctx); build(); }
 

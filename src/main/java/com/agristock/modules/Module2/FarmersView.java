@@ -20,8 +20,8 @@ public class FarmersView extends View {
     private final TableView<Farmer> farmerTable = UI.table();
     private final TableView<HarvestLog> harvestTable = UI.table();
     private final ComboBox<String> farmerSelect = new ComboBox<>();
-    private final TextField farmerId, farmerName, farmerContact;
-    private final TextField harvestCrop, harvestQty, harvestDate;
+    private TextField farmerId, farmerName, farmerContact;
+    private TextField harvestCrop, harvestQty, harvestDate;
 
     public FarmersView(Ctx ctx) { super(ctx); build(); }
 
