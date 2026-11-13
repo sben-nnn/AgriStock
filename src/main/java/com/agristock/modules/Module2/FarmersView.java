@@ -40,14 +40,14 @@ public class FarmersView extends View {
         h.add("Date", harvestDate = h.text("Date (YYYY-MM-DD)"));
         h.wide(UI.btn("Record Harvest", "secondary", this::recordHarvest));
 
-        UI.col(farmerTable, "ID", f -> f.id);
-        UI.col(farmerTable, "Name", f -> f.name);
-        UI.col(farmerTable, "Contact", f -> f.contact);
-        UI.col(farmerTable, "Total Harvest", f -> String.format("%,.2f kg", f.totalHarvest()));
+        UI.col(farmerTable, "ID", fr -> fr.id);
+        UI.col(farmerTable, "Name", fr -> fr.name);
+        UI.col(farmerTable, "Contact", fr -> fr.contact);
+        UI.col(farmerTable, "Total Harvest", fr -> String.format("%,.2f kg", fr.totalHarvest()));
 
-        UI.col(harvestTable, "Crop", h -> h.cropType);
-        UI.col(harvestTable, "Qty (kg)", h -> String.format("%,.2f", h.quantity));
-        UI.col(harvestTable, "Date", h -> h.date.toString());
+        UI.col(harvestTable, "Crop", hl -> hl.cropType);
+        UI.col(harvestTable, "Qty (kg)", hl -> String.format("%,.2f", hl.quantity));
+        UI.col(harvestTable, "Date", hl -> hl.date.toString());
 
         getChildren().addAll(
                 UI.card(UI.cardTitle("Register Farmer"), f.grid),
