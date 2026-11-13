@@ -10,5 +10,5 @@ public class DispatchView extends View {
 
     @Override public String title() { return "10  Dispatch"; }
     @Override public Feature feature() { return Feature.DISPATCH; }
-    @Override public void refresh() { getChildren().clear(); header("Dispatch & Delivery", "Schedule deliveries by earliest deadline and confirm receipt."); }
+    @Override public void refresh() { getChildren().clear(); header("Dispatch & Delivery", ""); }
 }
