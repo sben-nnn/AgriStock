@@ -85,12 +85,12 @@ public class AgriStockSystem {
 
     public void addUser(String username, String fullName, String password, Role role) {
         require(Feature.USERS);
-        username = username.trim();
-        if (username.isEmpty() || fullName.trim().isEmpty() || password.isEmpty() || role == null)
+        String user = username.trim();
+        if (user.isEmpty() || fullName.trim().isEmpty() || password.isEmpty() || role == null)
             throw new AgriException("Username, full name, password and role are required.");
-        if (!users.insert(username, new User(username, hash(password), fullName.trim(), role)))
-            throw new AgriException("Username '" + username + "' already exists.");
-        logTransaction("USER_ADD", username, "Created user with role " + role.label);
+        if (!users.insert(user, new User(user, hash(password), fullName.trim(), role)))
+            throw new AgriException("Username '" + user + "' already exists.");
+        logTransaction("USER_ADD", user, "Created user with role " + role.label);
     }
 
     public void editUser(String username, String fullName, String newPassword) {
@@ -130,11 +130,11 @@ public class AgriStockSystem {
 
     public void registerFarmer(String id, String name, String contact) {
         require(Feature.FARMERS);
-        id = id.trim();
-        if (id.isEmpty() || name.trim().isEmpty()) throw new AgriException("Farmer ID and name are required.");
-        if (findFarmer(id) != null) throw new AgriException("Farmer already exists in registry.");
-        farmers.addFirst(new Farmer(id, name.trim(), contact.trim()));
-        logTransaction("FARMER_ADD", id, "Registered farmer " + name);
+        String fid = id.trim();
+        if (fid.isEmpty() || name.trim().isEmpty()) throw new AgriException("Farmer ID and name are required.");
+        if (findFarmer(fid) != null) throw new AgriException("Farmer already exists in registry.");
+        farmers.addFirst(new Farmer(fid, name.trim(), contact.trim()));
+        logTransaction("FARMER_ADD", fid, "Registered farmer " + name);
     }
 
     public void recordHarvest(String farmerId, String crop, double qty, LocalDate date) {

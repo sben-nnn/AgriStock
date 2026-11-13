@@ -10,8 +10,8 @@ import javafx.scene.layout.VBox;
 // User & Role Management
 public class UsersView extends View {
     private final TableView<User> table = UI.table();
-    private final TextField username, fullName;
-    private final PasswordField password;
+    private TextField username, fullName;
+    private PasswordField password;
     private final ComboBox<Role> role = new ComboBox<>();
 
     public UsersView(Ctx ctx) { super(ctx); build(); }
