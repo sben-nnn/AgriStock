@@ -37,8 +37,8 @@ public class StockView extends View {
         search.setPromptText("Item ID or crop...");
         searchF.add("Category", categoryFilter);
         searchF.add("Flag", flagFilter);
-        searchF.wide(UI.btn("Apply Filters", "primary", e -> refresh()));
-        searchF.wide(UI.btn("Refresh", "ghost", e -> refresh()));
+        searchF.wide(UI.btn("Apply Filters", "primary", () -> refresh()));
+        searchF.wide(UI.btn("Refresh", "ghost", () -> refresh()));
         VBox filterCard = UI.card(UI.cardTitle("Search & Filters"), searchF.grid);
         filterCard.setPrefWidth(380);
 
