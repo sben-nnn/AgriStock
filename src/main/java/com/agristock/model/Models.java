@@ -19,7 +19,6 @@ public final class Models {
     /** Role-Based Access Control: which roles may use which feature. */
     public enum Feature {
         USERS(Role.OWNER),
-        FARMERS(Role.OWNER, Role.MANAGER),
         BATCHES(Role.OWNER, Role.MANAGER, Role.INVENTORY),
         HARVEST_STOCK(Role.OWNER, Role.MANAGER, Role.INVENTORY),
         INSPECTION(Role.OWNER, Role.MANAGER, Role.INVENTORY),

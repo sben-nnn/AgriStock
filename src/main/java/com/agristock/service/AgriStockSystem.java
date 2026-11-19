@@ -217,6 +217,12 @@ public class AgriStockSystem {
         return "B-" + n;
     }
 
+    public String nextFarmId() {
+        int n = farms.size() + 1001;
+        while (findFarm("FARM-" + n) != null) n++;
+        return "FARM-" + n;
+    }
+
     public Batch createHarvestBatch(String batchId, String farmId, String plot, String crop, String variety,
                                     String worker, String farmerId, LocalDate harvest, LocalDate expiry,
                                     double qty, String unit) {

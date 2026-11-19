@@ -7,7 +7,6 @@ import com.agristock.service.Persistence;
 import com.agristock.service.ReportService;
 import com.agristock.service.SampleData;
 import com.agristock.ui.*;
-import com.agristock.modules.Module2.FarmersView;
 import com.agristock.modules.Module3.BatchesView;
 import com.agristock.modules.Module4.HarvestStockView;
 import com.agristock.modules.Module5.InspectionView;
