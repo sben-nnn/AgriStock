@@ -32,6 +32,7 @@ public class FarmersView extends View {
         farmerName = f.text("Name");
         farmerContact = f.text("Contact");
         f.wide(UI.btn("Register Farmer", "primary", this::registerFarmer));
+        f.wide(UI.btn("Delete Farmer", "danger", this::deleteFarmer));
 
         UI.Form h = new UI.Form();
         h.add("Farmer ID", farmerSelect);
@@ -64,6 +65,15 @@ public class FarmersView extends View {
         // Register a new farmer in the linked list.
         sys.registerFarmer(farmerId.getText(), farmerName.getText(), farmerContact.getText());
         farmerId.clear(); farmerName.clear(); farmerContact.clear();
+        refresh();
+    }
+
+    private void deleteFarmer() {
+        // Delete the selected farmer from the registry.
+        Farmer f = farmerTable.getSelectionModel().getSelectedItem();
+        if (f == null) throw new AgriException("Select a farmer first.");
+        if (!UI.confirm("Delete farmer '" + f.name + "'?")) return;
+        sys.deleteFarmer(f.id);
         refresh();
     }
 
