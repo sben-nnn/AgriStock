@@ -3,7 +3,6 @@ package com.agristock.modules.Module12;
 import com.agristock.model.AgriException;
 import com.agristock.model.Models.*;
 import com.agristock.service.Fmt;
-import com.agristock.service.ReportService;
 import com.agristock.ui.Ctx;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
@@ -17,8 +16,8 @@ import javafx.scene.layout.VBox;
 import java.util.ArrayList;
 import java.util.List;
 
-/** MODULE 12: Forecasting (array + moving average). */
 public class ForecastView extends View {
+    private final ForecastService svc;
     private final TableView<YieldRecord> table = UI.table();
     private final ComboBox<String> crop = new ComboBox<>();
     private final TextField season, yield, demand, window, ratio, seedCost;
@@ -27,6 +26,7 @@ public class ForecastView extends View {
 
     public ForecastView(Ctx ctx) {
         super(ctx);
+        svc = new ForecastService(sys);
         header("12 - Forecasting", "Historical yields are kept in an array; a moving average over the latest seasons smooths variance and projects seed requirements.");
         crop.setEditable(true);
         UI.Form h = new UI.Form();
@@ -58,24 +58,24 @@ public class ForecastView extends View {
 
     private void addHistory() {
         double d = demand.getText().trim().isEmpty() ? 0 : UI.num(demand, "Demand");
-        rep.addYieldRecord(cropName(), season.getText(), UI.num(yield, "Yield"), d);
+        svc.addYieldRecord(cropName(), season.getText(), UI.num(yield, "Yield"), d);
         season.clear(); yield.clear(); demand.clear(); refresh(); showChart();
     }
 
     private void forecast() {
         String c = cropName();
         if (c.isEmpty()) throw new AgriException("Choose a crop.");
-        double[] y = rep.yieldsFor(c, false), dm = rep.yieldsFor(c, true);
+        double[] y = svc.yieldsFor(c, false), dm = svc.yieldsFor(c, true);
         int w = (int) UI.num(window, "Window");
         double r = UI.num(ratio, "Seed ratio") / 100.0, cost = UI.num(seedCost, "Seed cost");
-        double avg = ReportService.movingAverage(y, w), seed = ReportService.forecastSeedNeed(y, w, r);
+        double avg = ForecastService.movingAverage(y, w), seed = ForecastService.forecastSeedNeed(y, w, r);
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("Crop: %s | seasons on file: %d%n", c, y.length));
         sb.append(String.format("Moving average yield (%d-season window): %,.2f kg%n", w, avg));
         sb.append(String.format("Projected seed need (%.0f%%): %,.2f kg%n", r * 100, seed));
-        sb.append(String.format("Seasonal seed budget: %s%n", Fmt.peso(seed * cost)));
+        sb.append(String.format("Seasonal seed budget: %s%n", Fmt.peso(ForecastService.forecastSeedBudget(y, w, r, cost))));
         boolean hasDemand = false; for (double v : dm) if (v > 0) hasDemand = true;
-        if (hasDemand && dm.length >= w) sb.append(String.format("Moving average demand: %,.2f kg%n", ReportService.movingAverage(dm, w)));
+        if (hasDemand && dm.length >= w) sb.append(String.format("Moving average demand: %,.2f kg%n", ForecastService.movingAverage(dm, w)));
         out.setText(sb.toString());
     }
 
