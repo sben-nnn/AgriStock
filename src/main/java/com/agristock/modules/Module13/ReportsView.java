@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/** MODULE 13: Reports & Analytics (array, merge sort, binary search on date ranges). */
 public class ReportsView extends View {
+    private final ReportsService svc;
     private final TableView<ReportEntry> table = UI.table();
     private final ComboBox<String> type = new ComboBox<>(), crop = new ComboBox<>(), farm = new ComboBox<>();
     private final TextField batch = new TextField();
@@ -24,6 +24,7 @@ public class ReportsView extends View {
 
     public ReportsView(Ctx ctx) {
         super(ctx);
+        svc = new ReportsService(sys);
         header("13 - Reports & Analytics", "Report data is copied to an array, merge-sorted by date, and binary search finds the start and end of the chosen date range.");
         type.getItems().addAll(Arrays.asList("Harvest", "Inventory", "Sales", "Dispatch", "Loss")); type.setValue("Harvest");
         batch.setPromptText("Batch ID"); batch.setPrefWidth(110);
@@ -34,10 +35,10 @@ public class ReportsView extends View {
         UI.col(table, "Date", e -> e.date.toString()); UI.col(table, "Quantity (kg)", e -> Fmt.kg(e.qty)); UI.col(table, "Value", e -> Fmt.peso(e.value));
         table.setPrefHeight(260);
         analytics.setEditable(false); analytics.getStyleClass().add("mono"); analytics.setPrefRowCount(10);
-        HBox ab = UI.row(UI.btn("Estimated revenue", "secondary", () -> analytics.setText(rep.computeEstimatedRevenue())),
-                UI.btn("High-loss crops", "secondary", () -> analytics.setText(rep.identifyHighLossCrops())),
-                UI.btn("Slow-moving stock", "secondary", () -> analytics.setText(rep.identifySlowMoving())),
-                UI.btn("Seasonal trends", "secondary", () -> analytics.setText(rep.analyzeSeasonalTrends())));
+        HBox ab = UI.row(UI.btn("Estimated revenue", "secondary", () -> analytics.setText(svc.computeEstimatedRevenue())),
+                UI.btn("High-loss crops", "secondary", () -> analytics.setText(svc.identifyHighLossCrops())),
+                UI.btn("Slow-moving stock", "secondary", () -> analytics.setText(svc.identifySlowMoving())),
+                UI.btn("Seasonal trends", "secondary", () -> analytics.setText(svc.analyzeSeasonalTrends())));
         getChildren().addAll(UI.card(UI.cardTitle("Report builder"), filters, table, totals),
                 UI.card(UI.cardTitle("Analytics"), ab, analytics));
     }
@@ -46,7 +47,7 @@ public class ReportsView extends View {
     @Override public Feature feature() { return Feature.REPORTS; }
 
     private void generate() {
-        DynamicArray<ReportEntry> r = rep.generateReport(type.getValue(), crop.getValue(), farm.getValue(), batch.getText(), from.getValue(), to.getValue());
+        DynamicArray<ReportEntry> r = svc.generateReport(type.getValue(), crop.getValue(), farm.getValue(), batch.getText(), from.getValue(), to.getValue());
         UI.fill(table, r);
         double q = 0, v = 0; for (ReportEntry e : r) { q += e.qty; v += e.value; }
         totals.setText(r.size() + " entries | total quantity " + Fmt.kg(q) + " kg | total value " + Fmt.peso(v));
