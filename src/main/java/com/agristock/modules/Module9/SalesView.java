@@ -42,7 +42,7 @@ public class SalesView extends View {
         // ---------- Left panel: queue actions ----------
         VBox actions = new VBox(10,
                 UI.btn("Process All Pending (FIFO)", "secondary", this::processPending),
-                UI.btn("Refresh", "ghost", e -> refresh())
+                UI.btn("Refresh", "ghost", () -> refresh())
         );
         actions.setMaxWidth(Double.MAX_VALUE);
         for (Object o : actions.getChildren()) {
