@@ -1,6 +1,7 @@
 package com.agristock.service;
 
 import java.time.LocalDate;
+import com.agristock.model.Models.YieldRecord;
 
 /** Loads demo data made for testing (the proposal states the system is tested with group-made sample data). */
 public final class SampleData {
@@ -81,13 +82,12 @@ public final class SampleData {
         s.scheduleDelivery(s.sales.linearSearch(x -> x.ref.equals("SO-0002")), t.plusDays(5), "Van VAN-205", "Golden Grains, Cabanatuan", 2);
 
         s.recordSpoilage("B-1002", 12, "Spoiled during transport", "inventory");
-        ReportService rs = new ReportService(s);
         double[][] rice = {{4200, 4000}, {4500, 4300}, {4100, 4400}, {4800, 4600}, {5000, 4900}};
         double[][] tomato = {{1200, 1100}, {1350, 1300}, {1100, 1250}, {1500, 1400}, {1450, 1500}};
         String[] seasons = {"2024 Dry", "2024 Wet", "2025 Dry", "2025 Wet", "2026 Dry"};
         for (int i = 0; i < seasons.length; i++) {
-            rs.addYieldRecord("Rice", seasons[i], rice[i][0], rice[i][1]);
-            rs.addYieldRecord("Tomato", seasons[i], tomato[i][0], tomato[i][1]);
+            s.yields.add(new YieldRecord("Rice", seasons[i], rice[i][0], rice[i][1]));
+            s.yields.add(new YieldRecord("Tomato", seasons[i], tomato[i][0], tomato[i][1]));
         }
         s.logTransaction("SAMPLE_DATA", "-", "Sample data loaded");
     }
