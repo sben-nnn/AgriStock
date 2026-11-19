@@ -16,6 +16,12 @@ public class AVLTree<K extends Comparable<K>, V> {
     public int size() { return size; }
     public int height() { return h(root); }
 
+    /** Remove all entries from the tree. */
+    public void clear() {
+        root = null;
+        size = 0;
+    }
+
     /** AVL insert. Returns false (and changes nothing) if the key already exists. */
     public boolean insert(K key, V value) {
         inserted = false;
