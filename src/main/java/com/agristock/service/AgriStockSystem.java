@@ -146,8 +146,14 @@ public class AgriStockSystem {
     // MODULE 2: Farmer Tracking (Linked List + Linear Search)
     public Farmer findFarmer(String id) { return farmers.linearSearch(f -> f.id.equalsIgnoreCase(id)); }
 
+    public String nextFarmerId() {
+        int n = farmers.size() + 1001;
+        while (findFarmer("FR-" + n) != null) n++;
+        return "FR-" + n;
+    }
+
     public void registerFarmer(String id, String name, String contact) {
-        require(Feature.FARMERS);
+        require(Feature.BATCHES);
         String fid = id.trim();
         if (fid.isEmpty() || name.trim().isEmpty()) throw new AgriException("Farmer ID and name are required.");
         if (findFarmer(fid) != null) throw new AgriException("Farmer already exists in registry.");
@@ -156,7 +162,7 @@ public class AgriStockSystem {
     }
 
     public void recordHarvest(String farmerId, String crop, double qty, LocalDate date) {
-        require(Feature.FARMERS);
+        require(Feature.BATCHES);
         Farmer f = findFarmer(farmerId);
         if (f == null) throw new AgriException("Farmer ID not found.");
         if (crop == null || crop.trim().isEmpty()) throw new AgriException("Crop type is required.");
