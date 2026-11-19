@@ -40,8 +40,8 @@ public class ExpiryView extends View {
         // ---------- Left panel: expiry actions ----------
         VBox actions = new VBox(10,
                 UI.btn("Check & Purge Expired Stock", "danger", this::purgeExpired),
-                UI.btn("Rebuild Expiry Heap", "secondary", e -> { sys.rebuildExpiryHeap(); refresh(); }),
-                UI.btn("Refresh", "ghost", e -> refresh())
+                UI.btn("Rebuild Expiry Heap", "secondary", () -> { sys.rebuildExpiryHeap(); refresh(); }),
+                UI.btn("Refresh", "ghost", () -> refresh())
         );
         actions.setMaxWidth(Double.MAX_VALUE);
         for (Object o : actions.getChildren()) {
