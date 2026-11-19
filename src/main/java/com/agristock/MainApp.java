@@ -4,7 +4,6 @@ import com.agristock.model.AgriException;
 import com.agristock.model.Models.*;
 import com.agristock.service.AgriStockSystem;
 import com.agristock.service.Persistence;
-import com.agristock.service.ReportService;
 import com.agristock.service.SampleData;
 import com.agristock.ui.*;
 import com.agristock.modules.Module2.FarmersView;
@@ -36,8 +35,7 @@ import java.util.List;
 /** AgriStock - Agricultural Stock Management System (JavaFX front end). */
 public class MainApp extends Application {
     private final AgriStockSystem sys = new AgriStockSystem();
-    private final ReportService rep = new ReportService(sys);
-    private final Ctx ctx = new Ctx(sys, rep, this::refreshCurrent);
+    private final Ctx ctx = new Ctx(sys, this::refreshCurrent);
     private Stage stage;
     private boolean loadFailed;
     private ListView<View> nav;
