@@ -91,9 +91,12 @@ public class MainApp extends Application {
     // ------------------------------------------------------------------ main window
     private void showMain() {
         List<View> all = new ArrayList<>(List.of(
-                new DashboardView(ctx), new UsersView(ctx), new FarmersView(ctx), new BatchesView(ctx), new HarvestStockView(ctx),
+                new DashboardView(ctx), new UsersView(ctx), new BatchesView(ctx), new HarvestStockView(ctx),
                 new InspectionView(ctx), new StorageView(ctx), new StockView(ctx), new ExpiryView(ctx), new SalesView(ctx),
                 new DispatchView(ctx), new SpoilageView(ctx), new ForecastView(ctx), new ReportsView(ctx), new AuditView(ctx)));
+        // Each process (module) is hidden unless the signed-in user's role is permitted to use it.
+        // Dashboard (feature == null) is visible to everyone; every other screen is gated by its
+        // Feature so a role never sees processes it must not use.
         List<View> allowed = new ArrayList<>();
         for (View v : all) if (v.feature() == null || sys.checkPermission(v.feature())) allowed.add(v);
 
