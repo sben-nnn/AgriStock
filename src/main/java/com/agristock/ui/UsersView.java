@@ -28,7 +28,8 @@ public class UsersView extends View {
                 UI.btn("Add user", "primary", this::add),
                 UI.btn("Update details", "secondary", this::edit),
                 UI.btn("Assign role", "secondary", this::assign),
-                UI.btn("Deactivate / Activate", "danger", this::toggle)));
+                UI.btn("Deactivate / Activate", "danger", this::toggle),
+                UI.btn("Delete user", "danger", this::delete)));
         UI.col(table, "Username", u -> u.username);
         UI.col(table, "Full name", u -> u.fullName);
         UI.col(table, "Role", u -> u.role.label);
@@ -60,6 +61,12 @@ public class UsersView extends View {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
         sys.setUserActive(u.username, !u.active); refresh();
+    }
+    private void delete() {
+        User u = table.getSelectionModel().getSelectedItem();
+        if (u == null) throw new AgriException("Select a user first.");
+        if (!UI.confirm("Delete user '" + u.username + "'?")) return;
+        sys.deleteUser(u.username); refresh();
     }
 
     @Override public void refresh() {

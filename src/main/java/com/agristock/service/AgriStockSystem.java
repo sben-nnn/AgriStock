@@ -117,6 +117,24 @@ public class AgriStockSystem {
         logTransaction(active ? "USER_ACTIVATE" : "USER_DEACTIVATE", username, active ? "Account reactivated" : "Account deactivated");
     }
 
+    /** Number of active farm owners (used to protect the last owner account). */
+    private int activeOwnerCount() {
+        int[] n = { 0 };
+        users.inOrder(x -> { if (x.role == Role.OWNER && x.active) n[0]++; });
+        return n[0];
+    }
+
+    public void deleteUser(String username) {
+        require(Feature.USERS);          // only the farm owner can manage users/roles
+        User target = mustFindUser(username);
+        if (target == session) throw new AgriException("You cannot delete your own account.");
+        if (target.role == Role.OWNER && activeOwnerCount() <= 1)
+            throw new AgriException("Cannot delete the last active farm owner.");
+        if (!users.remove(username))
+            throw new AgriException("User '" + username + "' not found.");
+        logTransaction("USER_DELETE", username, "User account deleted");
+    }
+
     private User mustFindUser(String username) {
         User u = users.search(username);
         if (u == null) throw new AgriException("Select an existing user first.");

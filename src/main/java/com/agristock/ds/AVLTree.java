@@ -39,6 +39,42 @@ public class AVLTree<K extends Comparable<K>, V> {
         return n;
     }
 
+    /** Remove the node with the given key and rebalance. Returns true if a node was removed. */
+    public boolean remove(K key) {
+        boolean[] removed = { false };
+        root = remove(root, key, removed);
+        if (removed[0]) size--;
+        return removed[0];
+    }
+
+    private Node remove(Node n, K key, boolean[] removed) {
+        if (n == null) return null;
+        int c = key.compareTo(n.key);
+        if (c < 0) n.left = remove(n.left, key, removed);
+        else if (c > 0) n.right = remove(n.right, key, removed);
+        else {
+            removed[0] = true;
+            if (n.left == null) return n.right;
+            if (n.right == null) return n.left;
+            Node min = minNode(n.right);
+            n.key = min.key; n.value = min.value;
+            n.right = remove(n.right, n.key, removed);
+        }
+        n.height = 1 + Math.max(h(n.left), h(n.right));
+        int balance = h(n.left) - h(n.right);
+        if (balance > 1) {
+            if (balance(n.left) < 0) n.left = rotateLeft(n.left);
+            return rotateRight(n);
+        }
+        if (balance < -1) {
+            if (balance(n.right) > 0) n.right = rotateRight(n.right);
+            return rotateLeft(n);
+        }
+        return n;
+    }
+
+    private Node minNode(Node n) { while (n.left != null) n = n.left; return n; }
+
     /** Iterative binary search: O(log n). Returns null if not found. */
     public V search(K key) {
         Node cur = root;
