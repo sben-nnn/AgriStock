@@ -92,8 +92,7 @@ public class BatchesView extends View {
                 new Tab("Create Batch", batchPane)
         );
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        tabs.setPrefHeight(360);
-        tabs.setMaxHeight(360);
+        // Let each tab's form size to its content so nothing gets covered or cropped.
 
         UI.col(farmTable, "ID", f -> f.id);
         UI.col(farmTable, "Name", f -> f.name);
