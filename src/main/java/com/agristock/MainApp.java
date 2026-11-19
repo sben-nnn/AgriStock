@@ -7,6 +7,7 @@ import com.agristock.service.Persistence;
 import com.agristock.service.ReportService;
 import com.agristock.service.SampleData;
 import com.agristock.ui.*;
+import com.agristock.modules.Module2.FarmersView;
 import com.agristock.modules.Module3.BatchesView;
 import com.agristock.modules.Module4.HarvestStockView;
 import com.agristock.modules.Module5.InspectionView;
@@ -90,7 +91,7 @@ public class MainApp extends Application {
     // ------------------------------------------------------------------ main window
     private void showMain() {
         List<View> all = new ArrayList<>(List.of(
-                new DashboardView(ctx), new UsersView(ctx), new BatchesView(ctx), new HarvestStockView(ctx),
+                new DashboardView(ctx), new UsersView(ctx), new FarmersView(ctx), new BatchesView(ctx), new HarvestStockView(ctx),
                 new InspectionView(ctx), new StorageView(ctx), new StockView(ctx), new ExpiryView(ctx), new SalesView(ctx),
                 new DispatchView(ctx), new SpoilageView(ctx), new ForecastView(ctx), new ReportsView(ctx), new AuditView(ctx)));
         // Each process (module) is hidden unless the signed-in user's role is permitted to use it.
