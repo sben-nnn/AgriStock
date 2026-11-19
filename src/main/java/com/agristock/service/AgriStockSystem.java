@@ -161,6 +161,14 @@ public class AgriStockSystem {
         logTransaction("FARMER_ADD", fid, "Registered farmer " + name);
     }
 
+    public void deleteFarmer(String id) {
+        require(Feature.FARMERS);
+        Farmer f = findFarmer(id);
+        if (f == null) throw new AgriException("Farmer not found.");
+        farmers.remove(x -> x.id.equalsIgnoreCase(id));
+        logTransaction("FARMER_DELETE", id, "Deleted farmer " + f.name);
+    }
+
     public void recordHarvest(String farmerId, String crop, double qty, LocalDate date) {
         require(Feature.FARMERS);
         Farmer f = findFarmer(farmerId);
