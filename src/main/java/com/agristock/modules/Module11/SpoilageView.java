@@ -7,14 +7,16 @@ import com.agristock.ui.Ctx;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/** MODULE 11: Spoilage, Loss & Adjustments (append-only linked list). */
 public class SpoilageView extends View {
+    private final SpoilageService svc;
+    private final TextField search = new TextField();
     private final TableView<Spoilage> table = UI.table();
     private final ComboBox<String> item = new ComboBox<>(), reason = new ComboBox<>();
     private final TextField qty, reporter;
@@ -22,6 +24,7 @@ public class SpoilageView extends View {
 
     public SpoilageView(Ctx ctx) {
         super(ctx);
+        svc = new SpoilageService(sys);
         header("11 - Spoilage, Loss & Adjustments", "Losses are appended to a linked list and never overwritten. An authorised user (owner/manager) must approve an adjustment before stock changes.");
         UI.Form f = new UI.Form();
         f.add("Batch", item);
@@ -34,7 +37,7 @@ public class SpoilageView extends View {
         UI.Form a = new UI.Form();
         a.wide(UI.hint("Select a pending request in the table:"));
         a.wide(UI.buttons(UI.btn("Approve", "primary", () -> act(true)), UI.btn("Reject", "danger", () -> act(false))));
-        a.wide(UI.btn("Financial loss report", "accent", () -> UI.textDialog("Financial loss report", sys.getFinancialLossReport())));
+        a.wide(UI.btn("Financial loss report", "accent", () -> UI.textDialog("Financial loss report", svc.getFinancialLossReport())));
         total.getStyleClass().add("card-title");
         a.wide(total);
 
@@ -42,14 +45,16 @@ public class SpoilageView extends View {
         UI.col(table, "Qty (kg)", s -> Fmt.kg(s.qty)); UI.col(table, "Type", s -> s.kind); UI.col(table, "Reason", s -> s.reason);
         UI.col(table, "Reporter", s -> s.reporter); UI.col(table, "Status", s -> s.status); UI.col(table, "Approver", s -> s.approver);
         UI.col(table, "Loss value", s -> Fmt.peso(s.lossValue));
+        search.setPromptText("Batch ID (linear search)");
+        HBox searchRow = UI.row(search, UI.btn("Search", "primary", this::refresh), UI.btn("Show all", "ghost", () -> { search.clear(); refresh(); }));
         getChildren().add(UI.split(new VBox(14, UI.card(UI.cardTitle("Report a loss"), f.grid), UI.card(UI.cardTitle("Approval & reports"), a.grid)),
-                UI.card(UI.cardTitle("Spoilage & adjustment log (newest first)"), table), 340));
+                UI.card(UI.cardTitle("Spoilage & adjustment log (newest first)"), searchRow, table), 340));
     }
 
     @Override public String title() { return "11  Spoilage & Loss"; }
 
     private void log() {
-        Spoilage s = sys.recordSpoilage(UI.idOf(item), UI.num(qty, "Quantity"), reason.getEditor().getText(), reporter.getText());
+        Spoilage s = svc.requestAdjustment(UI.idOf(item), UI.num(qty, "Quantity"), reason.getEditor().getText(), reporter.getText());
         qty.clear(); reporter.clear(); refresh();
         UI.info("Logged", s.id + " is " + s.status + (s.status.equals("PENDING") ? " - waiting for an authorised user." : "."));
     }
@@ -57,12 +62,12 @@ public class SpoilageView extends View {
     private void act(boolean approve) {
         Spoilage s = table.getSelectionModel().getSelectedItem();
         if (s == null) throw new AgriException("Select a request first.");
-        if (approve) sys.approveAdjustment(s); else sys.rejectAdjustment(s);
+        if (approve) svc.approveAdjustment(s); else svc.rejectAdjustment(s);
         refresh();
     }
 
     @Override public void refresh() {
-        UI.fill(table, sys.spoilage);
+        UI.fill(table, svc.findByBatch(search.getText()));
         List<String> l = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) if (s.remaining > 0) l.add(s.itemId + " | " + s.crop + " (" + Fmt.kg(s.available()) + " kg available)");
         UI.setItems(item, l);
