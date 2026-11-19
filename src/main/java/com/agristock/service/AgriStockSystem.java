@@ -683,6 +683,14 @@ public class AgriStockSystem {
 
     public void logFinancialLoss(Spoilage sp, StockItem s) { sp.lossValue = sp.qty * s.unitValue; }
 
+    public List<Spoilage> spoilageForBatch(String itemId) {
+        List<Spoilage> out = new ArrayList<>();
+        for (Spoilage sp : spoilage) {
+            if (itemId == null || itemId.isBlank() || sp.itemId.equalsIgnoreCase(itemId.trim())) out.add(sp);
+        }
+        return out;
+    }
+
     // Linear traversal of the list from the head, aggregating approved losses.
     public String getFinancialLossReport() {
         StringBuilder sb = new StringBuilder("FINANCIAL LOSS REPORT (approved entries)\n----------------------------------------\n");
@@ -727,7 +735,7 @@ public class AgriStockSystem {
         if (physical < s.reserved - 0.0001) throw new AgriException("Physical count is lower than the reserved quantity (" + s.reserved + " kg). Resolve pending sales first.");
         double recorded = s.remaining;
         s.remaining = physical;
-        if (physical > 0 && diff > 0) rebuildExpiryHeap();
+        rebuildExpiryHeap();
         logAuditTrail("AUDIT_RECONCILE", itemId, recorded, physical, note.isBlank() ? "Count reconciled" : note.trim());
     }
 
