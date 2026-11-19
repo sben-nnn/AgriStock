@@ -36,6 +36,20 @@ public class SinglyLinkedList<T> implements Iterable<T> {
         return null;
     }
 
+    /** Remove first node matching the predicate: returns true if removed. */
+    public boolean remove(Predicate<T> match) {
+        Node<T> prev = null;
+        for (Node<T> c = head; c != null; prev = c, c = c.next) {
+            if (match.test(c.data)) {
+                if (prev == null) head = c.next; else prev.next = c.next;
+                if (c == tail) tail = prev;
+                size--;
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int size() { return size; }
     public boolean isEmpty() { return size == 0; }
 
