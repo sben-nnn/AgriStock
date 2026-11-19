@@ -58,7 +58,6 @@ public class PersistenceManager {
             if (!Files.isDirectory(BACKUP_DIR)) throw new AgriException("No backups found.");
             Path latest = null;
             try (var files = Files.list(BACKUP_DIR)) {
-                // File names contain the timestamp, so the biggest name is the newest.
                 latest = files.filter(p -> p.getFileName().toString().endsWith(".csv"))
                         .max((a, b) -> a.getFileName().toString().compareTo(b.getFileName().toString()))
                         .orElse(null);
