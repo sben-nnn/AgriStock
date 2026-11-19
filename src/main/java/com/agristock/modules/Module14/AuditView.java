@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-/** MODULE 14: Inventory Audit & Validation (append-only linked list + linear search). */
 public class AuditView extends View {
+    private final AuditService svc;
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final TableView<AuditEntry> table = UI.table();
     private final ComboBox<String> item = new ComboBox<>();
@@ -22,6 +22,7 @@ public class AuditView extends View {
 
     public AuditView(Ctx ctx) {
         super(ctx);
+        svc = new AuditService(sys);
         header("14 - Inventory Audit & Validation", "Physical counts are compared with recorded counts. Every transaction is appended to an immutable audit trail; invalid movements are rejected and logged.");
         UI.Form f = new UI.Form();
         f.add("Batch", item);
@@ -44,14 +45,14 @@ public class AuditView extends View {
     @Override public Feature feature() { return Feature.AUDIT_VIEW; }
 
     private void compare() {
-        double diff = sys.compareCounts(UI.idOf(item), UI.num(physical, "Physical count"));
+        double diff = svc.compareCounts(UI.idOf(item), UI.num(physical, "Physical count"));
         result.setText(Math.abs(diff) < 0.0001 ? "Counts match - no discrepancy." : String.format("Discrepancy: %+,.2f kg (%s)", diff, diff < 0 ? "shortage" : "surplus"));
     }
-    private void record() { sys.recordDifference(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); compare(); refresh(); }
-    private void reconcile() { sys.reconcile(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); result.setText("Reconciled - recorded stock now equals the physical count."); physical.clear(); refresh(); }
+    private void record() { svc.recordDifference(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); compare(); refresh(); }
+    private void reconcile() { svc.reconcile(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); result.setText("Reconciled - recorded stock now equals the physical count."); physical.clear(); refresh(); }
 
     @Override public void refresh() {
-        UI.fill(table, sys.auditHistory(filter.getText()));
+        UI.fill(table, svc.auditHistory(filter.getText()));
         List<String> l = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) l.add(s.itemId + " | " + s.crop + " (recorded " + Fmt.kg(s.remaining) + " kg)");
         UI.setItems(item, l);
