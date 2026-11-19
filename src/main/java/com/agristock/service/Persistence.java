@@ -57,7 +57,7 @@ public class Persistence {
                 line(w, "COUNTER", s.saleCounter, s.deliveryCounter, s.spoilageCounter);
                 line(w, "SETTING", s.lowStockKg, s.agingDays, s.nearExpiryDays);
                 s.users.inOrder(x -> line(w, "USER", x.username, x.passwordHash, x.fullName, x.role.name(), x.active));
-                for (Farm x : oldestFirst(s.farms)) line(w, "FARM", x.id, x.name, x.location);
+                for (Farm x : oldestFirst(s.farms)) line(w, "FARM", x.id, x.name, x.location, x.size);
                 for (Crop x : oldestFirst(s.crops)) line(w, "CROP", x.name, x.variety, x.category);
                 for (Farmer f : oldestFirst(s.farmers)) {
                     line(w, "FARMER", f.id, f.name, f.contact);
@@ -104,7 +104,7 @@ public class Persistence {
                     case "COUNTER": s.saleCounter = (int) n(t[1]); s.deliveryCounter = (int) n(t[2]); s.spoilageCounter = (int) n(t[3]); break;
                     case "SETTING": s.lowStockKg = n(t[1]); s.agingDays = (int) n(t[2]); s.nearExpiryDays = (int) n(t[3]); break;
                     case "USER": { User x = new User(t[1], t[2], t[3], Role.valueOf(t[4])); x.active = Boolean.parseBoolean(t[5]); s.users.insert(x.username, x); break; }
-                    case "FARM": s.farms.addFirst(new Farm(t[1], t[2], t[3])); break;
+                    case "FARM": s.farms.addFirst(new Farm(t[1], t[2], t[3], n(t[4]))); break;
                     case "CROP": s.crops.addFirst(new Crop(t[1], t[2], t[3])); break;
                     case "FARMER": s.farmers.addFirst(new Farmer(t[1], t[2], t[3])); break;
                     case "HLOG": { Farmer f = s.findFarmer(t[1]); if (f != null) f.harvests.addFirst(new HarvestLog(t[2], n(t[3]), d(t[4]))); break; }

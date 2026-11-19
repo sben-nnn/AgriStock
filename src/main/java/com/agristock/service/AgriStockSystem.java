@@ -187,12 +187,13 @@ public class AgriStockSystem {
 
     public Farm findFarm(String id) { return farms.linearSearch(f -> f.id.equalsIgnoreCase(id)); }
 
-    public void registerFarm(String id, String name, String location) {
+    public void registerFarm(String id, String name, String location, double size) {
         require(Feature.BATCHES);
         if (id.trim().isEmpty() || name.trim().isEmpty()) throw new AgriException("Farm/field ID and name are required.");
+        if (size <= 0) throw new AgriException("Farm size must be greater than zero (hectares).");
         if (findFarm(id.trim()) != null) throw new AgriException("Farm ID already exists.");
-        farms.addFirst(new Farm(id.trim(), name.trim(), location.trim()));
-        logTransaction("FARM_ADD", id.trim(), "Registered farm " + name);
+        farms.addFirst(new Farm(id.trim(), name.trim(), location.trim(), size));
+        logTransaction("FARM_ADD", id.trim(), "Registered farm " + name + " (" + String.format("%.2f", size) + " ha)");
     }
 
     public void registerCrop(String name, String variety, String category) {

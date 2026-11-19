@@ -54,7 +54,8 @@ public final class Models {
 
     public static class Farm {
         public String id, name, location;
-        public Farm(String i, String n, String l) { id = i; name = n; location = l; }
+        public double size; // farm size in hectares
+        public Farm(String i, String n, String l, double s) { id = i; name = n; location = l; size = s; }
     }
 
     public static class Crop {

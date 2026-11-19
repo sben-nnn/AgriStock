@@ -18,8 +18,8 @@ public final class SampleData {
         s.registerFarmer(f1, "Juan Dela Cruz", "0917-111-2222");
         s.registerFarmer(f2, "Maria Santos", "0918-333-4444");
         s.registerFarmer(f3, "Pedro Reyes", "0919-555-6666");
-        s.registerFarm("FARM-A", "Dela Cruz Farm", "Nueva Ecija");
-        s.registerFarm("FARM-B", "Santos Orchard", "Batangas");
+        s.registerFarm("FARM-A", "Dela Cruz Farm", "Nueva Ecija", 2.5);
+        s.registerFarm("FARM-B", "Santos Orchard", "Batangas", 1.8);
         s.registerCrop("Rice", "Jasmine", "Grain");
         s.registerCrop("Tomato", "Diamante", "Vegetable");
         s.registerCrop("Mango", "Carabao", "Fruit");
