@@ -10,6 +10,7 @@ import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import com.agristock.ui.Ctx;
 import com.agristock.service.AgriStockSystem;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -26,10 +27,19 @@ public class BatchesView extends View {
     private final ComboBox<String> farmSelect = new ComboBox<>();
     private final ComboBox<String> cropSelect = new ComboBox<>();
     private TextField farmName, farmLocation, farmSize;
-    private TextField cropName, cropVariety, cropCategory;
+    private TextField cropName, cropCategory;
+    private ComboBox<String> cropVariety; // variety chosen from a selection
     private TextField batchPlot, batchWorker;
     private TextField batchHarvest, batchExpiry, batchQty, batchUnit;
     private Label nextFarmId, nextBatchId;
+
+    // Default crop varieties offered as a selection. The combo is editable so a variety
+    // not in the list can still be entered.
+    private static final List<String> VARIETIES = List.of(
+            "Jasmine", "Diamante", "Carabao", "Yellow", "Long Purple", "Lakatan",
+            "IR64", "NSIC Rc 222", "Hass", "Kent", "Granny Smith", "Cavendish",
+            "Sweet Corn", "Glutinous", "Other"
+    );
 
     public BatchesView(Ctx ctx) { super(ctx); build(); }
 
@@ -49,7 +59,10 @@ public class BatchesView extends View {
         // ---- Tab 2: Register Crop ----
         UI.Form f2 = new UI.Form();
         cropName = f2.text("Crop Name");
-        cropVariety = f2.text("Variety");
+        cropVariety = new ComboBox<>(FXCollections.observableArrayList(VARIETIES));
+        cropVariety.setEditable(true);
+        cropVariety.setPromptText("Select or type a variety");
+        f2.add("Variety", cropVariety);
         cropCategory = f2.text("Category");
         f2.wide(UI.btn("Register Crop", "secondary", this::registerCrop));
         VBox cropPane = new VBox(12, f2.grid);
@@ -120,8 +133,10 @@ public class BatchesView extends View {
     }
 
     private void registerCrop() {
-        sys.registerCrop(cropName.getText(), cropVariety.getText(), cropCategory.getText());
-        cropName.clear(); cropVariety.clear(); cropCategory.clear();
+        String variety = cropVariety.getValue() == null ? "" : cropVariety.getValue().trim();
+        if (variety.isEmpty()) throw new AgriException("A crop variety is required.");
+        sys.registerCrop(cropName.getText(), variety, cropCategory.getText());
+        cropName.clear(); cropVariety.setValue(null); cropCategory.clear();
         refresh();
     }
 
