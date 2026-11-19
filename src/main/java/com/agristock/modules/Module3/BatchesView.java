@@ -46,7 +46,7 @@ public class BatchesView extends View {
     private void build() {
         header("3 - Farm, Crop & Batch Registration", "");
 
-        // ---- Tab 1: Register Farm ----
+        // ---- Tab 1: Register Farm (form + list in one tab, nothing blocked) ----
         UI.Form f1 = new UI.Form();
         f1.wide(nextFarmId = new Label());
         farmName = f1.text("Name");
@@ -56,7 +56,17 @@ public class BatchesView extends View {
         VBox farmPane = new VBox(12, f1.grid);
         farmPane.setPadding(new Insets(12));
 
-        // ---- Tab 2: Register Crop ----
+        UI.col(farmTable, "ID", f -> f.id);
+        UI.col(farmTable, "Name", f -> f.name);
+        UI.col(farmTable, "Location", f -> f.location);
+        UI.col(farmTable, "Size (ha)", f -> String.format("%.2f", f.size));
+        VBox farmCard = UI.card(UI.cardTitle("Farms"), farmTable);
+        VBox.setVgrow(farmTable, Priority.ALWAYS);
+        VBox.setVgrow(farmCard, Priority.ALWAYS);
+        VBox tab1 = new VBox(12, farmPane, farmCard);
+        VBox.setVgrow(tab1, Priority.ALWAYS);
+
+        // ---- Tab 2: Register Crop (form + list in one tab) ----
         UI.Form f2 = new UI.Form();
         cropName = f2.text("Crop Name");
         cropVariety = new ComboBox<>(FXCollections.observableArrayList(VARIETIES));
@@ -68,7 +78,16 @@ public class BatchesView extends View {
         VBox cropPane = new VBox(12, f2.grid);
         cropPane.setPadding(new Insets(12));
 
-        // ---- Tab 3: Create Batch ----
+        UI.col(cropTable, "Name", c -> c.name);
+        UI.col(cropTable, "Variety", c -> c.variety);
+        UI.col(cropTable, "Category", c -> c.category);
+        VBox cropCard = UI.card(UI.cardTitle("Crops"), cropTable);
+        VBox.setVgrow(cropTable, Priority.ALWAYS);
+        VBox.setVgrow(cropCard, Priority.ALWAYS);
+        VBox tab2 = new VBox(12, cropPane, cropCard);
+        VBox.setVgrow(tab2, Priority.ALWAYS);
+
+        // ---- Tab 3: Create Batch (form + list in one tab) ----
         UI.Form f3 = new UI.Form();
         f3.wide(nextBatchId = new Label());
         f3.add("Farm ID", farmSelect);
@@ -84,25 +103,6 @@ public class BatchesView extends View {
         VBox batchPane = new VBox(12, f3.grid);
         batchPane.setPadding(new Insets(12));
 
-        TabPane tabs = new TabPane();
-        tabs.getStyleClass().add("tab-pane");
-        tabs.getTabs().addAll(
-                new Tab("Register Farm", farmPane),
-                new Tab("Register Crop", cropPane),
-                new Tab("Create Batch", batchPane)
-        );
-        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        // Let each tab's form size to its content so nothing gets covered or cropped.
-
-        UI.col(farmTable, "ID", f -> f.id);
-        UI.col(farmTable, "Name", f -> f.name);
-        UI.col(farmTable, "Location", f -> f.location);
-        UI.col(farmTable, "Size (ha)", f -> String.format("%.2f", f.size));
-
-        UI.col(cropTable, "Name", c -> c.name);
-        UI.col(cropTable, "Variety", c -> c.variety);
-        UI.col(cropTable, "Category", c -> c.category);
-
         UI.col(batchTable, "Batch ID", b -> b.batchId);
         UI.col(batchTable, "Farm", b -> b.farmId);
         UI.col(batchTable, "Crop", b -> b.crop);
@@ -110,14 +110,22 @@ public class BatchesView extends View {
         UI.col(batchTable, "Qty (kg)", b -> String.format("%,.2f", b.quantityKg));
         UI.col(batchTable, "Harvest", b -> b.harvestDate.toString());
         UI.col(batchTable, "Expiry", b -> b.expiryDate.toString());
-
-        VBox farmCard = UI.card(UI.cardTitle("Farms"), farmTable);
-        VBox cropCard = UI.card(UI.cardTitle("Crops"), cropTable);
         VBox batchCard = UI.card(UI.cardTitle("Batches (AVL tree)"), batchTable);
-        VBox.setVgrow(farmCard, Priority.ALWAYS);
-        VBox.setVgrow(cropCard, Priority.ALWAYS);
+        VBox.setVgrow(batchTable, Priority.ALWAYS);
         VBox.setVgrow(batchCard, Priority.ALWAYS);
-        getChildren().addAll(tabs, farmCard, cropCard, batchCard);
+        VBox tab3 = new VBox(12, batchPane, batchCard);
+        VBox.setVgrow(tab3, Priority.ALWAYS);
+
+        TabPane tabs = new TabPane();
+        tabs.getStyleClass().add("tab-pane");
+        tabs.getTabs().addAll(
+                new Tab("Register Farm", tab1),
+                new Tab("Register Crop", tab2),
+                new Tab("Create Batch", tab3)
+        );
+        tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        VBox.setVgrow(tabs, Priority.ALWAYS);
+        getChildren().addAll(tabs);
     }
 
     @Override public String title() { return "3  Batches"; }
