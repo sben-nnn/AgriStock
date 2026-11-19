@@ -39,6 +39,12 @@ public class SinglyLinkedList<T> implements Iterable<T> {
     public int size() { return size; }
     public boolean isEmpty() { return size == 0; }
 
+    /** Remove all elements from the list. */
+    public void clear() {
+        head = tail = null;
+        size = 0;
+    }
+
     @Override
     public Iterator<T> iterator() {
         return new Iterator<>() {
