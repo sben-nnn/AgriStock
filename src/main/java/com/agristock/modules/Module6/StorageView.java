@@ -46,7 +46,7 @@ public class StorageView extends View {
         // ---------- Left panel: storage actions ----------
         VBox actions = new VBox(10,
                 UI.btn("Rotate Stock FIFO (oldest first)", "secondary", this::rotateFifo),
-                UI.btn("Refresh", "ghost", e -> refresh())
+                UI.btn("Refresh", "ghost", () -> refresh())
         );
         actions.setMaxWidth(Double.MAX_VALUE);
         for (Object o : actions.getChildren()) {
