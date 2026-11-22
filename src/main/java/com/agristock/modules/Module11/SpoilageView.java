@@ -34,9 +34,16 @@ public class SpoilageView extends View {
         reporter = f.text("Reporter");
         f.wide(UI.btn("Log spoilage / request adjustment", "primary", this::log));
         f.wide(UI.hint("Owners and managers are authorised, so their requests are approved immediately."));
+
+        Button approveBtn = UI.btn("Approve", "primary", () -> act(true));
+        Button rejectBtn = UI.btn("Reject", "danger", () -> act(false));
+        boolean canApprove = sys.checkPermission(Feature.SPOILAGE_APPROVE);
+        approveBtn.setDisable(!canApprove);
+        rejectBtn.setDisable(!canApprove);
+
         UI.Form a = new UI.Form();
-        a.wide(UI.hint("Select a pending request in the table:"));
-        a.wide(UI.buttons(UI.btn("Approve", "primary", () -> act(true)), UI.btn("Reject", "danger", () -> act(false))));
+        a.wide(UI.hint(canApprove ? "Select a pending request in the table:" : "Only the Farm Owner or Farm Manager can approve or reject requests."));
+        a.wide(UI.buttons(approveBtn, rejectBtn));
         a.wide(UI.btn("Financial loss report", "accent", () -> UI.textDialog("Financial loss report", svc.getFinancialLossReport())));
         total.getStyleClass().add("card-title");
         a.wide(total);
@@ -52,6 +59,7 @@ public class SpoilageView extends View {
     }
 
     @Override public String title() { return "11  Spoilage & Loss"; }
+    @Override public Feature feature() { return Feature.SPOILAGE_LOG; }
 
     private void log() {
         Spoilage s = svc.requestAdjustment(UI.idOf(item), UI.num(qty, "Quantity"), reason.getEditor().getText(), reporter.getText());
