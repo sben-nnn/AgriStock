@@ -18,6 +18,7 @@ public abstract class View extends VBox {
     public abstract void refresh();
 
     protected void header(String heading, String sub) {
-        getChildren().addAll(UI.heading(heading), UI.subtitle(sub));
+        getChildren().add(UI.heading(heading));
+        if (sub != null && !sub.isBlank()) getChildren().add(UI.subtitle(sub));
     }
 }
