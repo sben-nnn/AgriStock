@@ -4,12 +4,9 @@ import com.agristock.model.AgriException;
 import com.agristock.model.Models.Batch;
 import com.agristock.model.Models.BatchStatus;
 import com.agristock.model.Models.Feature;
-import com.agristock.model.Models.StockRecord;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import com.agristock.ui.Ctx;
-import com.agristock.service.AgriStockSystem;
-import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
@@ -108,9 +105,12 @@ public class InspectionView extends View {
         for (Batch b : sys.inspectionQueue) queue.add(b);
         UI.fill(queueTable, queue);
 
-        // Inspected: all registered batches (sorted), showing their latest status.
+        // Inspected: only batches that already have an inspection result.
         List<Batch> inspected = new ArrayList<>();
-        for (Batch b : sys.batches.toSortedArray()) inspected.add(b);
+        for (Batch b : sys.batches.toSortedArray()) {
+            if (b.status == BatchStatus.ACCEPTED || b.status == BatchStatus.DOWNGRADED || b.status == BatchStatus.REJECTED)
+                inspected.add(b);
+        }
         UI.fill(inspectedTable, inspected);
     }
 }
