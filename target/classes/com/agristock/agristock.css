@@ -1,0 +1,58 @@
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-base: #f1f6ee;
+    -fx-focus-color: #43a047;
+    -fx-faint-focus-color: #43a04722;
+}
+/* ---------- layout ---------- */
+.sidebar { -fx-background-color: #1b5e20; }
+.brand { -fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold; }
+.brand-sub { -fx-text-fill: #a5d6a7; -fx-font-size: 11px; }
+.nav-list { -fx-background-color: transparent; -fx-control-inner-background: #1b5e20; -fx-padding: 6 0 6 0; }
+.nav-list .list-cell { -fx-text-fill: #dcedc8; -fx-padding: 10 18; -fx-background-color: transparent; -fx-font-size: 13px; }
+.nav-list .list-cell:filled:hover { -fx-background-color: #2e7d32; }
+.nav-list .list-cell:filled:selected { -fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-color: #ffca28; -fx-border-width: 0 0 0 4; }
+.topbar { -fx-background-color: white; -fx-border-color: #dcedc8; -fx-border-width: 0 0 1 0; -fx-padding: 10 20; }
+.user-chip { -fx-background-color: #e8f5e9; -fx-text-fill: #1b5e20; -fx-background-radius: 14; -fx-padding: 4 12; -fx-font-weight: bold; }
+.page { -fx-background-color: #f1f6ee; -fx-padding: 18; -fx-spacing: 12; }
+.page-title { -fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1b5e20; }
+.page-sub { -fx-text-fill: #6b7b6b; }
+.card { -fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e0e8da; -fx-border-radius: 10; -fx-padding: 14; -fx-spacing: 10;
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 8, 0, 0, 2); }
+.card-title { -fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2e7d32; }
+.hint { -fx-text-fill: #7a8a7a; -fx-font-size: 11px; }
+.status-ok { -fx-text-fill: #2e7d32; -fx-font-weight: bold; }
+.status-bad { -fx-text-fill: #c62828; -fx-font-weight: bold; }
+.mono { -fx-font-family: "Consolas", "Courier New", monospace; -fx-font-size: 12px; }
+.scroll-pane { -fx-background-color: transparent; }
+.scroll-pane > .viewport { -fx-background-color: transparent; }
+/* ---------- controls ---------- */
+.button { -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 7 14; }
+.button.primary { -fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold; }
+.button.primary:hover { -fx-background-color: #388e3c; }
+.button.secondary { -fx-background-color: #e8f5e9; -fx-text-fill: #1b5e20; -fx-font-weight: bold; }
+.button.secondary:hover { -fx-background-color: #c8e6c9; }
+.button.accent { -fx-background-color: #f9a825; -fx-text-fill: #3e2c00; -fx-font-weight: bold; }
+.button.accent:hover { -fx-background-color: #fbc02d; }
+.button.danger { -fx-background-color: #c62828; -fx-text-fill: white; -fx-font-weight: bold; }
+.button.danger:hover { -fx-background-color: #d32f2f; }
+.button.ghost { -fx-background-color: transparent; -fx-text-fill: #1b5e20; -fx-border-color: #a5d6a7; -fx-border-radius: 6; }
+.text-field, .password-field, .text-area, .combo-box, .date-picker { -fx-background-radius: 6; -fx-border-radius: 6; }
+.table-view { -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e0e8da; }
+.table-view .column-header-background { -fx-background-color: #e8f5e9; }
+.table-view .column-header, .table-view .filler { -fx-background-color: #e8f5e9; -fx-border-color: transparent transparent #c8e6c9 transparent; }
+.table-view .column-header .label { -fx-text-fill: #1b5e20; -fx-font-weight: bold; }
+.table-row-cell:filled:selected { -fx-background-color: #a5d6a7; -fx-text-background-color: #0b3d0b; }
+/* ---------- tabs ---------- */
+.tab-pane .tab-header-area .tab-header-background { -fx-background-color: transparent; }
+.tab:selected .tab-label { -fx-text-fill: #1b5e20; -fx-font-weight: bold; }
+/* ---------- dashboard ---------- */
+.kpi-value { -fx-font-size: 24px; -fx-font-weight: bold; }
+.kpi-title { -fx-text-fill: #6b7b6b; -fx-font-size: 12px; }
+.alert-list { -fx-background-color: transparent; }
+/* ---------- login ---------- */
+.login-bg { -fx-background-color: linear-gradient(to bottom right, #1b5e20, #66bb6a); }
+.login-card { -fx-background-color: white; -fx-background-radius: 14; -fx-padding: 32; -fx-spacing: 12;
+              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 24, 0, 0, 6); }
+.login-title { -fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #1b5e20; }
