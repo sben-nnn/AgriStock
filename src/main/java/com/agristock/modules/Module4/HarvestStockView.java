@@ -7,11 +7,8 @@ import com.agristock.model.Models.StockRecord;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import com.agristock.ui.Ctx;
-import com.agristock.service.AgriStockSystem;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,8 +62,10 @@ public class HarvestStockView extends View {
     }
 
     @Override public void refresh() {
+        // Only batches that do not have a harvest stock record yet.
         List<String> bids = new ArrayList<>();
-        for (Batch b : sys.batches.toSortedArray()) bids.add(b.batchId);
+        for (Batch b : sys.batches.toSortedArray())
+            if (sys.findStockRecord(b.batchId) == null) bids.add(b.batchId);
         UI.setItems(batchSelect, bids);
 
         List<StockRecord> records = new ArrayList<>();
