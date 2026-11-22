@@ -55,7 +55,7 @@ public class Persistence {
         try {
             Files.createDirectories(FILE.getParent());
             try (BufferedWriter w = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
-                line(w, "COUNTER", s.saleCounter, s.deliveryCounter, s.spoilageCounter);
+                line(w, "COUNTER", s.saleCounter, s.deliveryCounter, s.spoilageCounter, s.itemCounter);
                 line(w, "SETTING", s.lowStockKg, s.agingDays, s.nearExpiryDays);
                 s.users.inOrder(x -> line(w, "USER", x.username, x.passwordHash, x.fullName, x.role.name(), x.active));
                 for (Farm x : oldestFirst(s.farms)) line(w, "FARM", x.id, x.name, x.location, x.size);
@@ -108,7 +108,7 @@ public class Persistence {
                 if (ln.isBlank()) continue;
                 String[] t = split(ln);
                 switch (t[0]) {
-                    case "COUNTER": s.saleCounter = (int) n(t[1]); s.deliveryCounter = (int) n(t[2]); s.spoilageCounter = (int) n(t[3]); break;
+                    case "COUNTER": s.saleCounter = (int) n(t[1]); s.deliveryCounter = (int) n(t[2]); s.spoilageCounter = (int) n(t[3]); s.itemCounter = (int) n(t[4]); break;
                     case "SETTING": s.lowStockKg = n(t[1]); s.agingDays = (int) n(t[2]); s.nearExpiryDays = (int) n(t[3]); break;
                     case "USER": { User x = new User(t[1], t[2], t[3], Role.valueOf(t[4])); x.active = Boolean.parseBoolean(t[5]); s.users.insert(x.username, x); break; }
                     case "FARM": s.farms.addFirst(new Farm(t[1], t[2], t[3], n(t[4]))); break;
