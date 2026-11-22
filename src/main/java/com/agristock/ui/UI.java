@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.function.Function;
 
-/** Small helper toolkit so every view stays short and consistent. */
+// Small helper toolkit so every view stays short and consistent.
 public final class UI {
     private UI() {}
 
@@ -39,7 +39,7 @@ public final class UI {
         return a.showAndWait().orElse(ButtonType.NO) == ButtonType.YES;
     }
 
-    /** Shows monospaced text (receipts, reports) in a dialog. */
+   // Shows monospaced text (receipts, reports) in a dialog.
     public static void textDialog(String title, String text) {
         TextArea ta = new TextArea(text);
         ta.setEditable(false); ta.getStyleClass().add("mono"); ta.setPrefSize(560, 380);
@@ -50,7 +50,7 @@ public final class UI {
         d.showAndWait();
     }
 
-    /** Runs an action and converts validation errors into an alert. */
+    //Runs an action and converts validation errors into an alert.
     public static void run(Runnable r) {
         try { r.run(); }
         catch (AgriException e) { error(e.getMessage()); }
@@ -68,6 +68,7 @@ public final class UI {
         ok.addEventFilter(ActionEvent.ACTION, ev -> {
             try { onOk.run(); }
             catch (AgriException e) { error(e.getMessage()); ev.consume(); }
+            catch (RuntimeException e) { e.printStackTrace(); error("Unexpected problem: " + e); ev.consume(); }
         });
         d.showAndWait();
     }
@@ -80,7 +81,7 @@ public final class UI {
         catch (NumberFormatException e) { throw new AgriException("Enter a valid number for " + name + "."); }
     }
 
-    /** "B-1001 | Rice ..." -> "B-1001" */
+    // "B-1001 | Rice ..." -> "B-1001"
     public static String idOf(ComboBox<String> c) {
         String v = c.getValue();
         if (v == null) return null;
@@ -145,7 +146,7 @@ public final class UI {
         return f;
     }
 
-    /** Form card on the left (fixed width, scrollable) and content on the right. */
+    // Form card on the left (fixed width, scrollable) and content on the right.
     public static HBox split(Node left, Node right, double leftWidth) {
         ScrollPane sp = new ScrollPane(left);
         sp.setFitToWidth(true); sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
