@@ -3,16 +3,17 @@ package com.agristock.modules.Module7;
 import com.agristock.model.AgriException;
 import com.agristock.model.Models.Feature;
 import com.agristock.model.Models.StockItem;
+import com.agristock.service.AgriStockSystem;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import com.agristock.ui.Ctx;
-import com.agristock.service.AgriStockSystem;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // MODULE 7: Stock Monitoring & Control (AVL Tree, in-order traversal, binary search)
@@ -22,8 +23,14 @@ public class StockView extends View {
     private final ComboBox<String> categoryFilter = new ComboBox<>();
     private final ComboBox<String> flagFilter = new ComboBox<>();
     private final ComboBox<String> itemSelect = new ComboBox<>();
-    private TextField itemId, crop, category, harvestedQty, expiryDate, unitValue;
+    private final ComboBox<String> editSelect = new ComboBox<>();
+    private TextField itemId, crop, harvestedQty, unitValue;
+    private ComboBox<String> category;
+    private DatePicker expiryDate;
     private TextField reserveQty, releaseQty;
+    private ComboBox<String> editCategory;
+    private DatePicker editExpiry;
+    private TextField editValue;
 
     public StockView(Ctx ctx) { super(ctx); build(); }
 
@@ -31,14 +38,20 @@ public class StockView extends View {
         header("7 - Stock Monitoring & Control",
                 "Browse inventory (AVL in-order), search stock, and add or adjust stock items.");
 
+        // Filter defaults are set ONCE here (refresh() must not reset them, or filtering never works).
+        categoryFilter.setItems(FXCollections.observableArrayList("All"));
+        categoryFilter.setValue("All");
+        flagFilter.setItems(FXCollections.observableArrayList("All", "Expired", "Near-expiry", "Low", "Aging"));
+        flagFilter.setValue("All");
+
         // ---------- Left panel: search & filters ----------
         UI.Form searchF = new UI.Form();
         searchF.add("Search", search);
         search.setPromptText("Item ID or crop...");
+        search.setOnAction(e -> refresh());
         searchF.add("Category", categoryFilter);
         searchF.add("Flag", flagFilter);
         searchF.wide(UI.btn("Apply Filters", "primary", () -> refresh()));
-        searchF.wide(UI.btn("Refresh", "ghost", () -> refresh()));
         VBox filterCard = UI.card(UI.cardTitle("Search & Filters"), searchF.grid);
         filterCard.setPrefWidth(380);
 
@@ -46,13 +59,30 @@ public class StockView extends View {
         UI.Form addF = new UI.Form();
         itemId = addF.text("Item ID");
         crop = addF.text("Crop");
-        category = addF.text("Category");
+        category = addF.combo("Category", Arrays.asList(AgriStockSystem.CATEGORIES));
         harvestedQty = addF.text("Qty (kg)");
-        expiryDate = addF.text("Expiry (YYYY-MM-DD)");
+        expiryDate = addF.date("Expiry", LocalDate.now().plusDays(7));
         unitValue = addF.text("Unit Value");
         addF.wide(UI.btn("Add Stock Item", "primary", this::addItem));
         VBox addCard = UI.card(UI.cardTitle("Add Stock Item"), addF.grid);
         addCard.setPrefWidth(380);
+
+        // ---------- Left panel: edit stock item ----------
+        UI.Form editF = new UI.Form();
+        editF.add("Item", editSelect);
+        editCategory = editF.combo("Category", Arrays.asList(AgriStockSystem.CATEGORIES));
+        editExpiry = editF.date("Expiry", null);
+        editValue = editF.text("Unit Value");
+        editF.wide(UI.btn("Save Changes", "secondary", this::editItem));
+        editSelect.valueProperty().addListener((o, a, id) -> {
+            StockItem s = id == null ? null : sys.searchStock(id);
+            if (s == null) return;
+            editCategory.setValue(s.category);
+            editExpiry.setValue(s.expiryDate);
+            editValue.setText(String.valueOf(s.unitValue));
+        });
+        VBox editCard = UI.card(UI.cardTitle("Edit Stock Item"), editF.grid);
+        editCard.setPrefWidth(380);
 
         // ---------- Left panel: reserve / release ----------
         UI.Form adjF = new UI.Form();
@@ -64,7 +94,7 @@ public class StockView extends View {
         VBox adjCard = UI.card(UI.cardTitle("Reserve / Release Stock"), adjF.grid);
         adjCard.setPrefWidth(380);
 
-        VBox left = new VBox(14, filterCard, addCard, adjCard);
+        VBox left = new VBox(14, filterCard, addCard, editCard, adjCard);
         left.setPrefWidth(400);
 
         // ---------- Right panel: stock inventory table ----------
@@ -95,13 +125,20 @@ public class StockView extends View {
     private void addItem() {
         String id = itemId.getText();
         String c = crop.getText();
-        String cat = category.getText();
         double qty = UI.num(harvestedQty, "Qty");
-        LocalDate expiry = LocalDate.parse(expiryDate.getText());
         double value = UI.num(unitValue, "Unit Value");
-        sys.addItem(id, c, cat, qty, expiry, value);
-        itemId.clear(); crop.clear(); category.clear();
-        harvestedQty.clear(); expiryDate.clear(); unitValue.clear();
+        sys.addItem(id, c, category.getValue(), qty, expiryDate.getValue(), value);
+        itemId.clear(); crop.clear(); category.setValue(null);
+        harvestedQty.clear(); unitValue.clear();
+        expiryDate.setValue(LocalDate.now().plusDays(7));
+        refresh();
+    }
+
+    private void editItem() {
+        String id = editSelect.getValue();
+        if (id == null) throw new AgriException("Select an item to edit.");
+        if (editCategory.getValue() == null) throw new AgriException("Select a category.");
+        sys.editItem(id, editCategory.getValue(), editExpiry.getValue(), UI.num(editValue, "Unit Value"));
         refresh();
     }
 
@@ -124,39 +161,19 @@ public class StockView extends View {
     }
 
     @Override public void refresh() {
+        // Category filter list (keeps the current selection; "All" is always present).
         List<String> cats = new ArrayList<>();
         cats.add("All");
         for (StockItem s : sys.traverseInventory()) {
             if (!cats.contains(s.category)) cats.add(s.category);
         }
         UI.setItems(categoryFilter, cats);
-        categoryFilter.setValue("All");
-
-        List<String> flags = new ArrayList<>();
-        flags.add("All");
-        flags.add("Expired");
-        flags.add("Near-expiry");
-        flags.add("Low");
-        flags.add("Aging");
-        UI.setItems(flagFilter, flags);
-        flagFilter.setValue("All");
 
         List<String> ids = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) ids.add(s.itemId);
         UI.setItems(itemSelect, ids);
+        UI.setItems(editSelect, ids);
 
-        List<StockItem> items = new ArrayList<>();
-        String t = search.getText().trim().toLowerCase();
-        String cat = categoryFilter.getValue();
-        String flag = flagFilter.getValue();
-        for (StockItem s : sys.traverseInventory()) {
-            if (!t.isEmpty()
-                    && !s.itemId.toLowerCase().contains(t)
-                    && !s.crop.toLowerCase().contains(t)) continue;
-            if (cat != null && !cat.equals("All") && !s.category.equals(cat)) continue;
-            if (flag != null && !flag.equals("All") && !sys.flagsOf(s).contains(flag)) continue;
-            items.add(s);
-        }
-        UI.fill(stockTable, items);
+        UI.fill(stockTable, sys.filterStock(search.getText(), categoryFilter.getValue(), flagFilter.getValue()));
     }
 }
