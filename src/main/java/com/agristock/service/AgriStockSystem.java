@@ -270,26 +270,25 @@ public class AgriStockSystem {
     // MODULE 4: Harvest Stock Recording (Linked List + Linear Search)
     public StockRecord findStockRecord(String batchId) { return stockRecords.linearSearch(r -> r.batchId.equals(batchId)); }
 
-    public void validateQuantity(double harvested, double rejected, double moisture) {
+    public void validateQuantity(double harvested, double rejected) {
         if (harvested <= 0) throw new AgriException("Harvested quantity must be greater than zero.");
         if (rejected < 0) throw new AgriException("Invalid or negative rejected quantity entered.");
         if (rejected > harvested) throw new AgriException("Rejected quantity cannot exceed harvested quantity.");
-        if (moisture < 0 || moisture > 100) throw new AgriException("Moisture must be between 0 and 100 %.");
     }
 
     public StockRecord recordHarvestedStock(String batchId, double harvested, double rejected, String grade,
-                                            String ripeness, double moisture, String rejectReason) {
+                                            String ripeness, String rejectReason) {
         require(Feature.HARVEST_STOCK);
         Batch b = batches.search(batchId == null ? "" : batchId);
         if (b == null) throw new AgriException("Select a registered batch.");
         if (findStockRecord(batchId) != null) throw new AgriException("Batch stock entry already logged.");   // linear search
-        validateQuantity(harvested, rejected, moisture);
+        validateQuantity(harvested, rejected);
         if (harvested > b.quantityKg + 0.0001) throw new AgriException("Harvested quantity cannot exceed the registered batch quantity ("
                 + String.format("%.2f", b.quantityKg) + " kg).");
         if (rejected > 0 && (rejectReason == null || rejectReason.trim().isEmpty()))
             throw new AgriException("Enter a reason for the rejected/damaged produce.");
         StockRecord r = new StockRecord();
-        r.batchId = batchId; r.harvestedQty = harvested; r.grade = grade; r.ripeness = ripeness; r.moisture = moisture;
+        r.batchId = batchId; r.harvestedQty = harvested; r.grade = grade; r.ripeness = ripeness;
         r.recorded = today(); r.rejectReason = rejectReason == null ? "" : rejectReason.trim();
         r.rejectedQty = 0; r.saleableQty = harvested;
         stockRecords.addFirst(r);

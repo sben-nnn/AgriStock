@@ -16,7 +16,7 @@ import java.util.List;
 public class HarvestStockView extends View {
     private final TableView<StockRecord> recordTable = UI.table();
     private final ComboBox<String> batchSelect = new ComboBox<>();
-    private TextField harvestedQty, rejectedQty, grade, ripeness, moisture, rejectReason;
+    private TextField harvestedQty, rejectedQty, grade, ripeness, rejectReason;
 
     public HarvestStockView(Ctx ctx) { super(ctx); build(); }
 
@@ -28,7 +28,6 @@ public class HarvestStockView extends View {
         rejectedQty = f.text("Rejected Qty (kg)");
         grade = f.text("Grade");
         ripeness = f.text("Ripeness");
-        moisture = f.text("Moisture (%)");
         rejectReason = f.text("Reject Reason");
         f.wide(UI.btn("Record Stock", "primary", this::recordStock));
 
@@ -37,7 +36,6 @@ public class HarvestStockView extends View {
         UI.col(recordTable, "Rejected (kg)", r -> String.format("%,.2f", r.rejectedQty));
         UI.col(recordTable, "Saleable (kg)", r -> String.format("%,.2f", r.saleableQty));
         UI.col(recordTable, "Grade", r -> r.grade);
-        UI.col(recordTable, "Moisture (%)", r -> String.format("%.1f", r.moisture));
         UI.col(recordTable, "Recorded", r -> r.recorded.toString());
 
         getChildren().addAll(
@@ -54,10 +52,9 @@ public class HarvestStockView extends View {
         if (bid == null) throw new AgriException("Select a batch.");
         double harvested = UI.num(harvestedQty, "Harvested Qty");
         double rejected = UI.num(rejectedQty, "Rejected Qty");
-        double moist = UI.num(moisture, "Moisture");
-        sys.recordHarvestedStock(bid, harvested, rejected, grade.getText(), ripeness.getText(), moist, rejectReason.getText());
+        sys.recordHarvestedStock(bid, harvested, rejected, grade.getText(), ripeness.getText(), rejectReason.getText());
         harvestedQty.clear(); rejectedQty.clear(); grade.clear(); ripeness.clear();
-        moisture.clear(); rejectReason.clear();
+        rejectReason.clear();
         refresh();
     }
 
