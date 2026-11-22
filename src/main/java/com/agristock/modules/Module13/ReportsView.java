@@ -6,8 +6,10 @@ import com.agristock.service.Fmt;
 import com.agristock.ui.Ctx;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,13 +31,19 @@ public class ReportsView extends View {
         type.getItems().addAll(Arrays.asList("Harvest", "Inventory", "Sales", "Dispatch", "Loss")); type.setValue("Harvest");
         batch.setPromptText("Batch ID"); batch.setPrefWidth(110);
         from.setPromptText("From"); to.setPromptText("To"); from.setPrefWidth(120); to.setPrefWidth(120);
-        HBox filters = UI.row(new Label("Report"), type, new Label("Crop"), crop, new Label("Farm"), farm, batch, from, to, UI.btn("Generate", "primary", this::generate));
+
+        FlowPane filters = new FlowPane(8, 8, new Label("Report"), type, new Label("Crop"), crop, new Label("Farm"), farm,
+                batch, from, to, UI.btn("Generate", "primary", this::generate));
+        filters.setAlignment(Pos.CENTER_LEFT);
+        filters.setRowValignment(VPos.CENTER);
+
         totals.getStyleClass().add("card-title");
         UI.col(table, "Type", e -> e.type); UI.col(table, "Batch", e -> e.ref); UI.col(table, "Crop", e -> e.crop); UI.col(table, "Farm", e -> e.farm);
         UI.col(table, "Date", e -> e.date.toString()); UI.col(table, "Quantity (kg)", e -> Fmt.kg(e.qty)); UI.col(table, "Value", e -> Fmt.peso(e.value));
         table.setPrefHeight(260);
         analytics.setEditable(false); analytics.getStyleClass().add("mono"); analytics.setPrefRowCount(10);
-        HBox ab = UI.row(UI.btn("Estimated revenue", "secondary", () -> analytics.setText(svc.computeEstimatedRevenue())),
+        FlowPane ab = new FlowPane(8, 8,
+                UI.btn("Estimated revenue", "secondary", () -> analytics.setText(svc.computeEstimatedRevenue())),
                 UI.btn("High-loss crops", "secondary", () -> analytics.setText(svc.identifyHighLossCrops())),
                 UI.btn("Slow-moving stock", "secondary", () -> analytics.setText(svc.identifySlowMoving())),
                 UI.btn("Seasonal trends", "secondary", () -> analytics.setText(svc.analyzeSeasonalTrends())));
