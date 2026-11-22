@@ -23,7 +23,7 @@ public final class SampleData {
         s.deliveryQueue.clear();
         s.spoilage.clear();
         s.yields.clear();
-        s.audit.clear();
+        s.rotationQueue.clear();
         s.saleCounter = 0;
         s.deliveryCounter = 0;
         s.spoilageCounter = 0;
