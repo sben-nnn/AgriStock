@@ -6,6 +6,7 @@ import com.agristock.model.Models.StockItem;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import com.agristock.ui.Ctx;
+import com.agristock.model.Models.Spoilage;
 import com.agristock.service.AgriStockSystem;
 import javafx.collections.FXCollections;
 import javafx.scene.control.*;
@@ -105,12 +106,15 @@ public class ExpiryView extends View {
 
     private void purgeExpired() {
         if (!UI.confirm("Permanently purge all expired stock? This cannot be undone.")) return;
-        List<StockItem> purged = sys.checkAndPurgeExpired();
+        List<Spoilage> purged = sys.checkAndPurgeExpired();
         StringBuilder sb = new StringBuilder("Purged expired stock:\n");
         if (purged.isEmpty()) sb.append("(none)");
-        for (StockItem s : purged)
-            sb.append("• ").append(s.itemId).append(" (").append(s.crop).append(") - ")
-                    .append(String.format("%,.2f", s.remaining)).append(" kg\n");
+        for (Spoilage sp : purged) {
+            StockItem s = sys.searchStock(sp.itemId);
+            sb.append("• ").append(sp.itemId)
+                    .append(s == null ? "" : " (" + s.crop + ")")
+                    .append(" - ").append(String.format("%,.2f", sp.qty)).append(" kg\n");
+        }
         UI.textDialog("Purge Result", sb.toString());
         refresh();
     }
@@ -122,7 +126,7 @@ public class ExpiryView extends View {
             if (!crops.contains(s.crop)) crops.add(s.crop);
         }
         UI.setItems(cropSelect, crops);
-        cropSelect.setValue("Any crop");
+        if (cropSelect.getValue() == null) cropSelect.setValue("Any crop");
 
         List<StockItem> byExpiry = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) {
