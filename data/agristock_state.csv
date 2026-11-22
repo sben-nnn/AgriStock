@@ -1,9 +1,0 @@
-COUNTER,0,0,0
-SETTING,50.0,14,7
-USER,admin,240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9,Farm Owner (default),OWNER,true
-USER,inventory,cd63ef271f9f5c81c3ac9e24e544f7e982360ebc027bf4e6b6960485b13f89e7,Inventory Staff (default),INVENTORY,true
-USER,manager,866485796cfa8d7c0cf7111640205b83076433547577511d81f8030ae99ecea5,Farm Manager (default),MANAGER,true
-USER,sales,6bc0a63cb29c92306020c0a6bbc358cc4628db277dc06e253535e126517ad637,Sales / Dispatch (default),SALES,true
-FARMER,FR-1001,Juan Dela Cruz,0917-111-2222
-AUDIT,FARMER_ADD,FR-1001,admin,Registered farmer Juan Dela Cruz,0.0,0.0,0.0,2026-11-22T21:04:37.379726700
-AUDIT,LOGOUT,admin,admin,Session ended,0.0,0.0,0.0,2026-11-22T21:05:34.801055
