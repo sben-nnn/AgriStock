@@ -30,9 +30,15 @@ public class AuditView extends View {
         note = f.text("Note");
         result.setWrapText(true); result.getStyleClass().add("card-title");
         f.wide(result);
-        f.wide(UI.buttons(UI.btn("Compare", "secondary", this::compare), UI.btn("Record difference", "secondary", this::record),
-                UI.btn("Reconcile (apply)", "primary", this::reconcile)));
-        f.wide(UI.hint("Recording keeps stock unchanged. Reconciling sets the recorded stock to the physical count and needs Owner/Manager authorisation."));
+
+        Button reconcileBtn = UI.btn("Reconcile (apply)", "primary", this::reconcile);
+        boolean canReconcile = sys.checkPermission(Feature.AUDIT_RECONCILE);
+        reconcileBtn.setDisable(!canReconcile);
+
+        f.wide(UI.buttons(UI.btn("Compare", "secondary", this::compare), UI.btn("Record difference", "secondary", this::record), reconcileBtn));
+        f.wide(UI.hint(canReconcile
+                ? "Recording keeps stock unchanged. Reconciling sets the recorded stock to the physical count and needs Owner/Manager authorisation."
+                : "Recording keeps stock unchanged. Reconciling is disabled: it needs Farm Owner / Farm Manager authorisation."));
         filter.setPromptText("Batch / reference (linear search)");
         UI.col(table, "Time", e -> e.time.format(FMT)); UI.col(table, "Event", e -> e.type); UI.col(table, "Reference", e -> e.ref);
         UI.col(table, "User", e -> e.user); UI.col(table, "Recorded", e -> Fmt.kg(e.recorded)); UI.col(table, "Physical", e -> Fmt.kg(e.physical));
