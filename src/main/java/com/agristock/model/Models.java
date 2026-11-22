@@ -85,7 +85,7 @@ public final class Models {
 
     public static class StockRecord {
         public String batchId, grade, ripeness, rejectReason;
-        public double harvestedQty, rejectedQty, saleableQty, moisture;
+        public double harvestedQty, rejectedQty, saleableQty;
         public LocalDate recorded;
     }
 
