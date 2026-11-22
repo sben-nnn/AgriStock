@@ -4,13 +4,16 @@ import com.agristock.model.AgriException;
 import com.agristock.model.Models.Feature;
 import com.agristock.model.Models.Sale;
 import com.agristock.model.Models.StockItem;
-import com.agristock.ui.View;
-import com.agristock.ui.UI;
+import com.agristock.service.Fmt;
 import com.agristock.ui.Ctx;
-import com.agristock.service.AgriStockSystem;
-import javafx.collections.FXCollections;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import com.agristock.ui.UI;
+import com.agristock.ui.View;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +25,11 @@ public class SalesView extends View {
     private final ComboBox<String> itemSelect = new ComboBox<>();
     private TextField buyer, saleQty, unitPrice, saleRef;
 
-    public SalesView(Ctx ctx) { super(ctx); build(); }
+    public SalesView(Ctx ctx) {
+        super(ctx);
+        build();
+        refresh();
+    }
 
     private void build() {
         header("9 - Sales & Stock Release",
@@ -31,23 +38,26 @@ public class SalesView extends View {
         // ---------- Left panel: create sale ----------
         UI.Form f = new UI.Form();
         buyer = f.text("Buyer");
+        itemSelect.setMaxWidth(Double.MAX_VALUE);
         f.add("Item / Batch", itemSelect);
         saleQty = f.text("Qty (kg)");
         unitPrice = f.text("Unit Price");
         saleRef = f.text("Reference No. (optional)");
         f.wide(UI.btn("Create Sale Order", "primary", this::createSale));
+
         VBox createCard = UI.card(UI.cardTitle("Create Sale Order"), f.grid);
         createCard.setPrefWidth(380);
 
         // ---------- Left panel: queue actions ----------
         VBox actions = new VBox(10,
                 UI.btn("Process All Pending (FIFO)", "secondary", this::processPending),
-                UI.btn("Refresh", "ghost", () -> refresh())
+                UI.btn("Refresh", "ghost", this::refresh)
         );
         actions.setMaxWidth(Double.MAX_VALUE);
         for (Object o : actions.getChildren()) {
             if (o instanceof Button) ((Button) o).setMaxWidth(Double.MAX_VALUE);
         }
+
         VBox actionCard = UI.card(UI.cardTitle("Queue Actions"), actions);
         actionCard.setPrefWidth(380);
 
@@ -92,16 +102,25 @@ public class SalesView extends View {
     @Override public Feature feature() { return Feature.SALES; }
 
     private void createSale() {
-        String b = buyer.getText();
-        String iid = itemSelect.getValue();
-        if (iid == null) throw new AgriException("Select an item / batch.");
-        double qty = UI.num(saleQty, "Qty");
-        double price = UI.num(unitPrice, "Unit Price");
-        String ref = saleRef.getText();
-        ref = ref.isEmpty() ? null : ref;
-        sys.createSale(b, iid, qty, price, ref);
-        buyer.clear(); saleQty.clear(); unitPrice.clear(); saleRef.clear();
-        refresh();
+        try {
+            String b = buyer.getText().trim();
+            if (b.isEmpty()) throw new AgriException("Enter a buyer name.");
+            String iid = UI.idOf(itemSelect);
+            if (iid == null) throw new AgriException("Select an item / batch.");
+            double qty = UI.num(saleQty, "Qty");
+            double price = UI.num(unitPrice, "Unit Price");
+            String ref = saleRef.getText().trim();
+            ref = ref.isEmpty() ? null : ref;
+
+            sys.createSale(b, iid, qty, price, ref);
+            buyer.clear();
+            saleQty.clear();
+            unitPrice.clear();
+            saleRef.clear();
+            refresh();
+        } catch (AgriException ex) {
+            UI.error(ex.getMessage());
+        }
     }
 
     private void processPending() {
@@ -109,16 +128,22 @@ public class SalesView extends View {
             UI.info("Nothing pending", "There are no pending sales orders.");
             return;
         }
-        int n = sys.processPendingSales();
-        UI.info("Processed", "Confirmed " + n + " sale order(s) and released stock.");
-        refresh();
+        try {
+            int n = sys.processPendingSales();
+            UI.info("Processed", "Confirmed " + n + " sale order(s) and released stock.");
+            refresh();
+        } catch (AgriException ex) {
+            UI.error(ex.getMessage());
+            refresh();
+        }
     }
 
     @Override public void refresh() {
-        // Items available for sale (not expired, stock remaining).
         List<String> ids = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) {
-            if (s.remaining > 0.0001 && !s.expiryDate.isBefore(sys.today())) ids.add(s.itemId);
+            if (s.remaining > 0.0001 && s.available() > 0.0001 && !s.expiryDate.isBefore(sys.today())) {
+                ids.add(s.itemId + " | " + s.crop + " (" + Fmt.kg(s.available()) + " available)");
+            }
         }
         UI.setItems(itemSelect, ids);
 
