@@ -39,7 +39,7 @@ public class AgriStockSystem {
     public User session;
     public double lowStockKg = 50;
     public int agingDays = 14, nearExpiryDays = 7;
-    public int saleCounter, deliveryCounter, spoilageCounter;
+    public int saleCounter, deliveryCounter, spoilageCounter, itemCounter;
 
     public LocalDate today() { return LocalDate.now(); }
 
@@ -391,15 +391,15 @@ public class AgriStockSystem {
     }
 
     // MODULE 7: Stock Monitoring & Control (AVL Tree, in-order traversal, binary search)
-    public StockItem addItem(String itemId, String crop, String category, double qty, LocalDate expiry, double unitValue) {
+    public StockItem addItem(String crop, String category, double qty, LocalDate expiry, double unitValue) {
         require(Feature.STOCK_EDIT);
-        if (itemId.trim().isEmpty() || crop.trim().isEmpty() || category == null) throw new AgriException("Item ID, crop and category are required.");
-        if (batches.search(itemId.trim()) != null) throw new AgriException("That ID belongs to a registered batch. Use a different item ID.");
+        if (crop.trim().isEmpty() || category == null) throw new AgriException("Crop and category are required.");
         if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
         if (unitValue <= 0) throw new AgriException("Unit value must be greater than zero.");
         if (expiry == null || !expiry.isAfter(today().minusDays(1))) throw new AgriException("Enter an expiry date that is not in the past.");
+        String id = String.format("IT-%04d", ++itemCounter);
         StockItem s = new StockItem();
-        s.itemId = itemId.trim(); s.crop = crop.trim(); s.category = category; s.harvestDate = today(); s.expiryDate = expiry;
+        s.itemId = id; s.crop = crop.trim(); s.category = category; s.harvestDate = today(); s.expiryDate = expiry;
         s.harvested = qty; s.remaining = qty; s.unitValue = unitValue;
         if (!stock.insert(s.itemId, s)) throw new AgriException("Item ID already exists in stock.");
         expiryHeap.insert(s);
