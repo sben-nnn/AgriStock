@@ -51,9 +51,10 @@ public class Persistence {
 
     // ------------------------------------------------------------ SAVE
     public static void save(AgriStockSystem s) {
+        Path tmp = FILE.resolveSibling(FILE.getFileName() + ".tmp");
         try {
             Files.createDirectories(FILE.getParent());
-            try (BufferedWriter w = Files.newBufferedWriter(FILE, StandardCharsets.UTF_8)) {
+            try (BufferedWriter w = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
                 line(w, "COUNTER", s.saleCounter, s.deliveryCounter, s.spoilageCounter);
                 line(w, "SETTING", s.lowStockKg, s.agingDays, s.nearExpiryDays);
                 s.users.inOrder(x -> line(w, "USER", x.username, x.passwordHash, x.fullName, x.role.name(), x.active));
@@ -78,7 +79,13 @@ public class Persistence {
                 for (YieldRecord y : s.yields) line(w, "YIELD", y.crop, y.season, y.yield, y.demand);
                 for (AuditEntry a : oldestFirst(s.audit)) line(w, "AUDIT", a.type, a.ref, a.user, a.note, a.recorded, a.physical, a.discrepancy, a.time);
             }
+            try {
+                Files.move(tmp, FILE, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException ex) {
+                Files.move(tmp, FILE, StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException | UncheckedIOException ex) {
+            try { Files.deleteIfExists(tmp); } catch (IOException ignored) {}
             throw new AgriException("Could not save system state: " + ex.getMessage());
         }
     }
