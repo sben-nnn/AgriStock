@@ -67,7 +67,7 @@ public class Persistence {
                 s.batches.inOrder(b -> line(w, "BATCH", b.batchId, b.farmId, b.plot, b.crop, b.variety, b.worker, b.farmerId,
                         b.unit, b.originalQty, b.quantityKg, b.harvestDate, b.expiryDate, b.status.name(), b.grade));
                 for (StockRecord r : oldestFirst(s.stockRecords))
-                    line(w, "SREC", r.batchId, r.harvestedQty, r.rejectedQty, r.saleableQty, r.grade, r.ripeness, r.rejectReason, r.moisture, r.recorded);
+                    line(w, "SREC", r.batchId, r.harvestedQty, r.rejectedQty, r.saleableQty, r.grade, r.ripeness, r.rejectReason, r.recorded);
                 for (Batch b : s.inspectionQueue) line(w, "INSPQ", b.batchId);
                 for (StorageEntry x : s.rotationQueue) line(w, "STORE", x.batchId, x.location, x.qty, x.storageDate, x.conditions, x.rotations);
                 s.stock.inOrder(x -> line(w, "STOCK", x.itemId, x.crop, x.category, x.harvestDate, x.expiryDate, x.grade, x.location,
@@ -125,7 +125,7 @@ public class Persistence {
                     case "SREC": {
                         StockRecord x = new StockRecord();
                         x.batchId = t[1]; x.harvestedQty = n(t[2]); x.rejectedQty = n(t[3]); x.saleableQty = n(t[4]); x.grade = t[5];
-                        x.ripeness = t[6]; x.rejectReason = t[7]; x.moisture = n(t[8]); x.recorded = d(t[9]);
+                        x.ripeness = t[6]; x.rejectReason = t[7]; x.recorded = d(t[8]);
                         s.stockRecords.addFirst(x); break;
                     }
                     case "INSPQ": { Batch b = s.batches.search(t[1]); if (b != null) s.inspectionQueue.enqueue(b); break; }
