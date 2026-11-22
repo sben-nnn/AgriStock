@@ -19,8 +19,13 @@ public class InspectionView extends View {
     private final TableView<Batch> inspectedTable = UI.table();
     private final ComboBox<BatchStatus> status = new ComboBox<>();
     private TextField grade, notes, unitValue;
+    private final InspectionService inspectionService;
 
-    public InspectionView(Ctx ctx) { super(ctx); build(); }
+    public InspectionView(Ctx ctx) {
+        super(ctx);
+        inspectionService = new InspectionService(sys);
+        build();
+    }
 
     private void build() {
         header("5 - Quality Inspection & Grading",
@@ -94,7 +99,7 @@ public class InspectionView extends View {
         double uv = 0;
         String uvText = unitValue.getText().trim();
         if (!uvText.isEmpty()) uv = UI.num(unitValue, "Unit Value");
-        sys.inspectBatch(sel.toString(), g, n, uv);
+        inspectionService.inspect(sel, g, n, uv);
         grade.clear(); notes.clear(); unitValue.clear();
         refresh();
     }
