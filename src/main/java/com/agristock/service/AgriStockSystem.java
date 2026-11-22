@@ -59,12 +59,14 @@ public class AgriStockSystem {
         users.insert("inventory", new User("inventory", hash("inventory123"), "Inventory Staff (default)", Role.INVENTORY));
         users.insert("sales", new User("sales", hash("sales123"), "Sales / Dispatch (default)", Role.SALES));
     }
-    
+
     public User login(String username, String password) {
-        User u = users.search(username.trim());
-        if (u == null) throw new AgriException("User not found.");
-        if (!u.active || !u.passwordHash.equals(hash(password)))
+        String name = username == null ? "" : username.trim();
+        User u = name.isEmpty() ? null : users.search(name);
+        if (u == null || !u.active || !u.passwordHash.equals(hash(password == null ? "" : password))) {
+            logTransaction("LOGIN_FAILED", name.isEmpty() ? "-" : name, "Failed login attempt");
             throw new AgriException("Invalid credentials or deactivated account.");
+        }
         session = u;
         logTransaction("LOGIN", u.username, "Authenticated session granted");
         return u;
@@ -183,13 +185,17 @@ public class AgriStockSystem {
     // MODULE 3: Farm, Crop & Harvest Batch Registration (AVL Tree by batch ID)
     public static final String[] UNITS = {"kg", "g", "lb", "ton", "sack (50 kg)"};
 
+    public static final String[] CATEGORIES = {"Grain", "Vegetable", "Fruit", "Root crop", "Legume", "Other"};
+
     public static double convertUnit(double qty, String unit) {
+        if (unit == null) throw new AgriException("Select a unit.");
         switch (unit) {
+            case "kg": return qty;
             case "g": return qty / 1000.0;
             case "lb": return qty * 0.45359237;
             case "ton": return qty * 1000.0;
             case "sack (50 kg)": return qty * 50.0;
-            default: return qty;
+            default: throw new AgriException("Unknown unit: " + unit);
         }
     }
 
@@ -312,13 +318,23 @@ public class AgriStockSystem {
         require(Feature.INSPECTION);
         if (inspectionQueue.isEmpty()) throw new AgriException("No batches awaiting inspection.");
         if (status == null) throw new AgriException("Select an inspection result.");
+        notes = notes == null ? "" : notes;
+        grade = grade == null ? "" : grade.trim();
         boolean eligible = status.equals("ACCEPTED") || status.equals("DOWNGRADED");
         if (!status.equals("ACCEPTED") && notes.trim().isEmpty()) throw new AgriException("A justification is required for downgraded or rejected batches.");
+        if (eligible && grade.isEmpty()) throw new AgriException("Enter a grade for accepted or downgraded batches.");
         if (eligible && unitValue <= 0) throw new AgriException("Enter an estimated unit value (per kg) greater than zero.");
+
+        // Validate everything BEFORE removing the batch from the queue.
+        Batch front = inspectionQueue.peek();
+        StockRecord r = findStockRecord(front.batchId);
+        if (r == null) throw new AgriException("No harvest stock record for batch " + front.batchId + ".");
+        if (eligible && stock.search(front.batchId) != null)
+            throw new AgriException("A stock item with ID '" + front.batchId + "' already exists. Remove or rename it before inspecting this batch.");
+
         Batch b = inspectionQueue.dequeue();                           // FIFO: front element
         gradeBatch(b, grade);
         b.status = BatchStatus.valueOf(status);
-        StockRecord r = findStockRecord(b.batchId);
         r.grade = grade;
         if (eligible) moveToSaleableInventory(b, r, unitValue);
         else { r.rejectedQty += r.saleableQty; r.saleableQty = 0; r.rejectReason = notes.trim(); }
@@ -333,7 +349,8 @@ public class AgriStockSystem {
         s.itemId = b.batchId; s.crop = b.crop; s.category = categoryOf(b.crop);
         s.harvestDate = b.harvestDate; s.expiryDate = b.expiryDate; s.grade = b.grade;
         s.harvested = r.harvestedQty; s.damaged = r.rejectedQty; s.remaining = r.saleableQty; s.unitValue = unitValue;
-        stock.insert(s.itemId, s);
+        if (!stock.insert(s.itemId, s))
+            throw new AgriException("Stock item '" + s.itemId + "' already exists.");
         if (s.remaining > 0) expiryHeap.insert(s);
     }
 
@@ -378,7 +395,9 @@ public class AgriStockSystem {
     public StockItem addItem(String itemId, String crop, String category, double qty, LocalDate expiry, double unitValue) {
         require(Feature.STOCK_EDIT);
         if (itemId.trim().isEmpty() || crop.trim().isEmpty() || category == null) throw new AgriException("Item ID, crop and category are required.");
+        if (batches.search(itemId.trim()) != null) throw new AgriException("That ID belongs to a registered batch. Use a different item ID.");
         if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
+        if (unitValue <= 0) throw new AgriException("Unit value must be greater than zero.");
         if (expiry == null || !expiry.isAfter(today().minusDays(1))) throw new AgriException("Enter an expiry date that is not in the past.");
         StockItem s = new StockItem();
         s.itemId = itemId.trim(); s.crop = crop.trim(); s.category = category; s.harvestDate = today(); s.expiryDate = expiry;
@@ -468,9 +487,9 @@ public class AgriStockSystem {
         stock.inOrder(s -> { if (s.remaining > 0) expiryHeap.insert(s); });
     }
 
-    public List<StockItem> checkAndPurgeExpired() {
+    public List<Spoilage> checkAndPurgeExpired() {
         require(Feature.EXPIRY);
-        List<StockItem> purged = new ArrayList<>();
+        List<Spoilage> purged = new ArrayList<>();
         while (!expiryHeap.isEmpty()) {
             StockItem root = expiryHeap.peek();
             if (root.remaining <= 0) { expiryHeap.extractMin(); continue; }
@@ -482,7 +501,7 @@ public class AgriStockSystem {
             Spoilage sp = newSpoilage(root.itemId, lost, "Expired - purged by FEFO check", "SYSTEM");
             sp.kind = "Expired purge"; sp.status = "APPROVED"; sp.approver = session.username; sp.lossValue = lost * root.unitValue;
             logAuditTrail("ADJUSTMENT", root.itemId, lost, 0, "Expired stock purged");
-            purged.add(root);
+            purged.add(sp);
         }
         return purged;
     }
@@ -554,6 +573,8 @@ public class AgriStockSystem {
         if (pendingSales.isEmpty()) throw new AgriException("No pending sales orders.");
         Sale sale = pendingSales.peek();
         StockItem s = mustFindStock(sale.itemId);
+        if (s.expiryDate.isBefore(today()))
+            throw new AgriException("Order " + sale.ref + " cannot be confirmed: batch " + s.itemId + " has expired. Cancel the order.");
         if (sale.qty > s.remaining + 0.0001) throw new AgriException("Order " + sale.ref + " cannot be confirmed: stock level changed.");
         pendingSales.dequeue();
         s.reserved = Math.max(0, s.reserved - sale.qty);
@@ -565,7 +586,13 @@ public class AgriStockSystem {
 
     public int processPendingSales() {
         int n = 0;
-        while (!pendingSales.isEmpty()) { confirmSale(); n++; }
+        while (!pendingSales.isEmpty()) {
+            try { confirmSale(); n++; }
+            catch (AgriException ex) {
+                if (n == 0) throw ex;
+                break;
+            }
+        }
         return n;
     }
 
@@ -582,15 +609,15 @@ public class AgriStockSystem {
     public String generateReceipt(Sale s) {
         if (!s.status.equals("CONFIRMED")) throw new AgriException("Receipts are only issued for confirmed sales.");
         return "==========================================\n" +
-               "            AGRISTOCK SALES RECEIPT\n" +
-               "==========================================\n" +
-               String.format("Reference No : %s%nDate         : %s%nBuyer        : %s%nBatch / Item  : %s%nCrop         : %s%n",
-                       s.ref, s.date, s.buyer, s.itemId, s.crop) +
-               String.format("Quantity     : %,.2f kg%nUnit price   : %s%n", s.qty, Fmt.peso(s.unitPrice)) +
-               "------------------------------------------\n" +
-               String.format("TOTAL        : %s%n", Fmt.peso(s.total())) +
-               "==========================================\n" +
-               "Issued by: " + (session == null ? "-" : session.fullName) + "\nThank you for your purchase!\n";
+                "            AGRISTOCK SALES RECEIPT\n" +
+                "==========================================\n" +
+                String.format("Reference No : %s%nDate         : %s%nBuyer        : %s%nBatch / Item  : %s%nCrop         : %s%n",
+                        s.ref, s.date, s.buyer, s.itemId, s.crop) +
+                String.format("Quantity     : %,.2f kg%nUnit price   : %s%n", s.qty, Fmt.peso(s.unitPrice)) +
+                "------------------------------------------\n" +
+                String.format("TOTAL        : %s%n", Fmt.peso(s.total())) +
+                "==========================================\n" +
+                "Issued by: " + (session == null ? "-" : session.fullName) + "\nThank you for your purchase!\n";
     }
 
     // MODULE 10: Dispatch & Delivery Monitoring (Priority Queue, Earliest Deadline First)
@@ -618,8 +645,6 @@ public class AgriStockSystem {
         if (deliveryQueue.isEmpty()) throw new AgriException("No scheduled deliveries.");
         Delivery d = deliveryQueue.dequeue();
         d.status = "DISPATCHED"; d.dispatchedQty = d.qty; d.dispatchDate = today();
-        StockItem s = stock.search(d.itemId);
-        if (s != null) s.dispatched += d.qty;
         logAuditTrail("DISPATCH", d.id, d.qty, 0, "Dispatched to " + d.company + " via " + d.vehicle);
         return d;
     }
