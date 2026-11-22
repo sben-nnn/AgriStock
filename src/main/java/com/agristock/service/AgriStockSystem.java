@@ -153,7 +153,7 @@ public class AgriStockSystem {
     }
 
     public void registerFarmer(String id, String name, String contact) {
-        require(Feature.FARMERS);
+        require(Feature.BATCHES);
         String fid = id.trim();
         if (fid.isEmpty() || name.trim().isEmpty()) throw new AgriException("Farmer ID and name are required.");
         if (findFarmer(fid) != null) throw new AgriException("Farmer already exists in registry.");
@@ -162,7 +162,7 @@ public class AgriStockSystem {
     }
 
     public void deleteFarmer(String id) {
-        require(Feature.FARMERS);
+        require(Feature.BATCHES);
         Farmer f = findFarmer(id);
         if (f == null) throw new AgriException("Farmer not found.");
         farmers.remove(x -> x.id.equalsIgnoreCase(id));
@@ -170,7 +170,7 @@ public class AgriStockSystem {
     }
 
     public void recordHarvest(String farmerId, String crop, double qty, LocalDate date) {
-        require(Feature.FARMERS);
+        require(Feature.BATCHES);
         Farmer f = findFarmer(farmerId);
         if (f == null) throw new AgriException("Farmer ID not found.");
         if (crop == null || crop.trim().isEmpty()) throw new AgriException("Crop type is required.");
