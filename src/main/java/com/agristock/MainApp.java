@@ -6,6 +6,7 @@ import com.agristock.service.AgriStockSystem;
 import com.agristock.service.Persistence;
 import com.agristock.service.SampleData;
 import com.agristock.ui.*;
+import com.agristock.modules.Module1.UserView;
 import com.agristock.modules.Module3.BatchesView;
 import com.agristock.modules.Module4.HarvestStockView;
 import com.agristock.modules.Module5.InspectionView;
@@ -22,16 +23,18 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** AgriStock - Agricultural Stock Management System (JavaFX front end). */
+// AgriStock - Agricultural Stock Management System (JavaFX front end)
 public class MainApp extends Application {
     private final AgriStockSystem sys = new AgriStockSystem();
     private final Ctx ctx = new Ctx(sys, this::refreshCurrent);
@@ -59,8 +62,10 @@ public class MainApp extends Application {
         catch (AgriException ex) { UI.error(ex.getMessage()); }
     }
 
+    // Opens the scene, never larger than the visible screen area. */
     private void setScene(Parent root, double w, double h) {
-        Scene s = new Scene(root, w, h);
+        Rectangle2D vb = Screen.getPrimary().getVisualBounds();
+        Scene s = new Scene(root, Math.min(w, vb.getWidth()), Math.min(h, vb.getHeight() - 60));
         s.getStylesheets().add(UI.css());
         stage.setScene(s);
     }
@@ -88,7 +93,7 @@ public class MainApp extends Application {
     // ------------------------------------------------------------------ main window
     private void showMain() {
         List<View> all = new ArrayList<>(List.of(
-                new DashboardView(ctx), new UsersView(ctx), new BatchesView(ctx), new HarvestStockView(ctx),
+                new DashboardView(ctx), new UserView(ctx), new BatchesView(ctx), new HarvestStockView(ctx),
                 new InspectionView(ctx), new StorageView(ctx), new StockView(ctx), new ExpiryView(ctx), new SalesView(ctx),
                 new DispatchView(ctx), new SpoilageView(ctx), new ForecastView(ctx), new ReportsView(ctx), new AuditView(ctx)));
         // Each process (module) is hidden unless the signed-in user's role is permitted to use it.
@@ -131,18 +136,24 @@ public class MainApp extends Application {
         if (v != null) v.refresh();
     }
 
-    private void save() { Persistence.save(sys); UI.info("Saved", "System state written to " + Persistence.FILE + " (it is also saved automatically on exit)."); }
+    private void save() {
+        if (loadFailed)
+            throw new AgriException("Saving is disabled: the saved file could not be read and would be overwritten. "
+                    + "Fix or rename data/agristock_state.csv and restart the app.");
+        Persistence.save(sys);
+        UI.info("Saved", "System state written to " + Persistence.FILE + " (it is also saved automatically on exit).");
+    }
 
     private void loadSample() {
-        if (!UI.confirm("Load demo farmers, batches, sales and deliveries? This only works on an empty system.")) return;
+        if (!UI.confirm("Load demo farmers, batches, sales and deliveries?\n\nThis REPLACES all existing farms, crops, batches, stock, sales, deliveries and spoilage records with demo data. User accounts and the audit trail are kept.")) return;
         SampleData.load(sys);
         refreshCurrent();
         UI.info("Sample data", "Demo data loaded. Browse the modules to explore it.");
     }
 
     private void logout() {
-        if (!loadFailed) Persistence.save(sys);
         sys.logout();
+        if (!loadFailed) Persistence.save(sys);
         showLogin();
     }
 
