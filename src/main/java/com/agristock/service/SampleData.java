@@ -55,12 +55,12 @@ public final class SampleData {
         s.recordHarvest(f1, "Tomato", 300, t.minusDays(6));
         s.recordHarvest(f2, "Mango", 250, t.minusDays(8));
 
-        s.recordHarvestedStock("B-1001", 1000, 50, "A", "N/A", 13.5, "Broken grains");
-        s.recordHarvestedStock("B-1002", 300, 15, "A", "Ripe", 90, "Bruised fruit");
-        s.recordHarvestedStock("B-1003", 250, 0, "B", "Ripe", 82, "");
-        s.recordHarvestedStock("B-1004", 1500, 30, "A", "N/A", 14, "Moldy cobs");
-        s.recordHarvestedStock("B-1005", 120, 0, "B", "Overripe", 91, "");
-        s.recordHarvestedStock("B-1006", 200, 0, "A", "Unripe", 75, "");
+        s.recordHarvestedStock("B-1001", 1000, 50, "A", "N/A", "Broken grains");
+        s.recordHarvestedStock("B-1002", 300, 15, "A", "Ripe", "Bruised fruit");
+        s.recordHarvestedStock("B-1003", 250, 0, "B", "Ripe", "");
+        s.recordHarvestedStock("B-1004", 1500, 30, "A", "N/A", "Moldy cobs");
+        s.recordHarvestedStock("B-1005", 120, 0, "B", "Overripe", "");
+        s.recordHarvestedStock("B-1006", 200, 0, "A", "Unripe", "");
 
         s.inspectBatch("ACCEPTED", "A", "", 48);
         s.inspectBatch("ACCEPTED", "A", "", 55);
