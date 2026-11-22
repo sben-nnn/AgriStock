@@ -120,7 +120,7 @@ public class StorageView extends View {
         // Storage locations from the system array.
         List<String> locs = new ArrayList<>();
         for (int i = 0; i < sys.locations.length; i++) locs.add((i + 1) + ". " + sys.locations[i]);
-        locationSelect.setItems(FXCollections.observableArrayList(locs));
+        if (locationSelect.getItems().isEmpty()) locationSelect.setItems(FXCollections.observableArrayList(locs));
 
         List<StorageEntry> entries = new ArrayList<>();
         for (StorageEntry e : sys.rotationQueue) entries.add(e);
