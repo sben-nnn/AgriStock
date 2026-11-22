@@ -24,7 +24,7 @@ public class StockView extends View {
     private final ComboBox<String> flagFilter = new ComboBox<>();
     private final ComboBox<String> itemSelect = new ComboBox<>();
     private final ComboBox<String> editSelect = new ComboBox<>();
-    private TextField itemId, crop, harvestedQty, unitValue;
+    private TextField crop, harvestedQty, unitValue;
     private ComboBox<String> category;
     private DatePicker expiryDate;
     private TextField reserveQty, releaseQty;
@@ -57,7 +57,6 @@ public class StockView extends View {
 
         // ---------- Left panel: add stock item ----------
         UI.Form addF = new UI.Form();
-        itemId = addF.text("Item ID");
         crop = addF.text("Crop");
         category = addF.combo("Category", Arrays.asList(AgriStockSystem.CATEGORIES));
         harvestedQty = addF.text("Qty (kg)");
@@ -123,12 +122,11 @@ public class StockView extends View {
     @Override public Feature feature() { return Feature.STOCK_EDIT; }
 
     private void addItem() {
-        String id = itemId.getText();
         String c = crop.getText();
         double qty = UI.num(harvestedQty, "Qty");
         double value = UI.num(unitValue, "Unit Value");
-        sys.addItem(id, c, category.getValue(), qty, expiryDate.getValue(), value);
-        itemId.clear(); crop.clear(); category.setValue(null);
+        sys.addItem(c, category.getValue(), qty, expiryDate.getValue(), value);
+        crop.clear(); category.setValue(null);
         harvestedQty.clear(); unitValue.clear();
         expiryDate.setValue(LocalDate.now().plusDays(7));
         refresh();
