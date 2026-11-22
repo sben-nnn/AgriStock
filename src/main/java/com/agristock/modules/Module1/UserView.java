@@ -1,11 +1,13 @@
-package com.agristock.ui;
+package com.agristock.modules.Module1;
 
 import com.agristock.model.AgriException;
 import com.agristock.model.Models.Feature;
 import com.agristock.model.Models.Role;
 import com.agristock.model.Models.User;
+import com.agristock.ui.Ctx;
+import com.agristock.ui.UI;
+import com.agristock.ui.View;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
 
 // User & Role Management
 public class UserView extends View {
