@@ -73,9 +73,9 @@ public final class SampleData {
         s.assignLocation("B-1003", 1, 250, t.minusDays(7), "13\u00B0C, 85% RH");
         s.assignLocation("B-1004", 4, 1470, t.minusDays(14), "Ambient, ventilated");
 
-        s.createSale("Metro Market", "B-1002", 100, 60, "");
-        s.createSale("Golden Grains Trading", "B-1001", 200, 62, "");
-        s.createSale("Fresh Mart", "B-1003", 80, 95, "");
+        s.createSale("Metro Market", "B-1002", 100, 60);
+        s.createSale("Golden Grains Trading", "B-1001", 200, 62);
+        s.createSale("Fresh Mart", "B-1003", 80, 95);
         s.confirmSale();
         s.confirmSale();
         s.scheduleDelivery(s.sales.linearSearch(x -> x.ref.equals("SO-0001")), t.plusDays(2), "Truck TRK-101", "Metro Market, Quezon City", 1);
