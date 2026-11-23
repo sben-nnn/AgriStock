@@ -28,10 +28,10 @@ public class SpoilageView extends View {
         header("11 - Spoilage, Loss & Adjustments", "Losses are appended to a linked list and never overwritten. An authorised user (owner/manager) must approve an adjustment before stock changes.");
         UI.Form f = new UI.Form();
         f.add("Batch", item);
-        qty = f.text("Quantity (kg)");
+        qty = f.text("Quantity (kg)", "10");
         reason.setEditable(true); reason.getItems().addAll(Arrays.asList("Spoiled / rotten", "Damaged in handling", "Pest damage", "Contaminated", "Missing / theft", "Spoiled during transport"));
         f.add("Reason", reason);
-        reporter = f.text("Reporter");
+        reporter = f.text("Reporter", "Juan Dela Cruz");
         f.wide(UI.btn("Log spoilage / request adjustment", "primary", this::log));
         f.wide(UI.hint("Owners and managers are authorised, so their requests are approved immediately."));
 
