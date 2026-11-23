@@ -24,7 +24,7 @@ public class StockView extends View {
     private final ComboBox<String> flagFilter = new ComboBox<>();
     private final ComboBox<String> itemSelect = new ComboBox<>();
     private final ComboBox<String> editSelect = new ComboBox<>();
-    private final ComboBox<String> crop = new ComboBox<>();
+    private ComboBox<String> crop;
     private TextField harvestedQty, unitValue;
     private ComboBox<String> category;
     private DatePicker expiryDate;

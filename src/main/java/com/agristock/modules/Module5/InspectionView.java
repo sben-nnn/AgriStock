@@ -18,7 +18,7 @@ public class InspectionView extends View {
     private final TableView<Batch> queueTable = UI.table();
     private final TableView<Batch> inspectedTable = UI.table();
     private final ComboBox<BatchStatus> status = new ComboBox<>();
-    private final ComboBox<String> grade = new ComboBox<>();
+    private ComboBox<String> grade;
     private TextField notes, unitValue;
 
     // Grade options offered as a selection, consistent with Module 4 harvest stock grading.
