@@ -36,7 +36,7 @@ public class StockView extends View {
 
     private void build() {
         header("7 - Stock Monitoring & Control",
-                "Browse inventory (AVL in-order), search stock, and add or adjust stock items.");
+                "Browse inventory, search stock, and add or adjust stock items.");
 
         // Filter defaults are set ONCE here (refresh() must not reset them, or filtering never works).
         categoryFilter.setItems(FXCollections.observableArrayList("All"));
@@ -108,7 +108,7 @@ public class StockView extends View {
         UI.col(stockTable, "Flags", s -> sys.flagsOf(s));
         UI.col(stockTable, "Location", s -> s.location);
 
-        VBox tableCard = UI.card(UI.cardTitle("Stock Inventory (AVL tree, in-order traversal)"), stockTable);
+        VBox tableCard = UI.card(UI.cardTitle("Stock Inventory"), stockTable);
         VBox.setVgrow(stockTable, Priority.ALWAYS);
         VBox.setVgrow(tableCard, Priority.ALWAYS);
 

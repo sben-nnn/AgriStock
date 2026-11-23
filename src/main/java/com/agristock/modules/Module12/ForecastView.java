@@ -27,7 +27,7 @@ public class ForecastView extends View {
     public ForecastView(Ctx ctx) {
         super(ctx);
         svc = new ForecastService(sys);
-        header("12 - Forecasting", "Historical yields are kept in an array; a moving average over the latest seasons smooths variance and projects seed requirements.");
+        header("12 - Forecasting", "A moving average over the latest seasons smooths variance and projects seed requirements.");
         crop.setEditable(true);
         UI.Form h = new UI.Form();
         h.add("Crop", crop);
@@ -46,7 +46,7 @@ public class ForecastView extends View {
         UI.col(table, "Crop", y -> y.crop); UI.col(table, "Season", y -> y.season);
         UI.col(table, "Yield (kg)", y -> Fmt.kg(y.yield)); UI.col(table, "Demand (kg)", y -> Fmt.kg(y.demand));
         crop.valueProperty().addListener((o, a, v) -> showChart());
-        VBox right = new VBox(12, UI.card(UI.cardTitle("Historical data (array)"), table), UI.card(UI.cardTitle("Yield vs. demand trend"), chart));
+        VBox right = new VBox(12, UI.card(UI.cardTitle("Historical data"), table), UI.card(UI.cardTitle("Yield vs. demand trend"), chart));
         VBox.setVgrow(right.getChildren().get(0), javafx.scene.layout.Priority.ALWAYS);
         getChildren().add(UI.split(new VBox(14, UI.card(UI.cardTitle("Historical yields"), h.grid), UI.card(UI.cardTitle("Forecast"), f.grid)), right, 340));
     }

@@ -33,7 +33,7 @@ public class SalesView extends View {
 
     private void build() {
         header("9 - Sales & Stock Release",
-                "Create sales orders (FIFO queue) and confirm them to release stock.");
+                "Create sales orders and confirm them to release stock.");
 
         // ---------- Left panel: create sale ----------
         UI.Form f = new UI.Form();

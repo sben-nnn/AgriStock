@@ -27,7 +27,7 @@ public class ReportsView extends View {
     public ReportsView(Ctx ctx) {
         super(ctx);
         svc = new ReportsService(sys);
-        header("13 - Reports & Analytics", "Report data is copied to an array, merge-sorted by date, and binary search finds the start and end of the chosen date range.");
+        header("13 - Reports & Analytics", "Finds the start and end of the chosen date range.");
         type.getItems().addAll(Arrays.asList("Harvest", "Inventory", "Sales", "Dispatch", "Loss")); type.setValue("Harvest");
         batch.setPromptText("Batch ID"); batch.setPrefWidth(110);
         from.setPromptText("From"); to.setPromptText("To"); from.setPrefWidth(120); to.setPrefWidth(120);
