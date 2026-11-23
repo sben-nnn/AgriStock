@@ -2,7 +2,7 @@ package com.agristock.ds;
 
 import java.util.function.Consumer;
 
-/** Self-balancing AVL tree keyed by K. Used for users (M1), batches (M3) and stock (M7). */
+// Self-balancing AVL tree keyed by K. Used for users (M1), batches (M3) and stock (M7).
 public class AVLTree<K extends Comparable<K>, V> {
     private class Node {
         K key; V value; int height = 1; Node left, right;
@@ -16,13 +16,13 @@ public class AVLTree<K extends Comparable<K>, V> {
     public int size() { return size; }
     public int height() { return h(root); }
 
-    /** Remove all entries from the tree. */
+    // Remove all entries from the tree.
     public void clear() {
         root = null;
         size = 0;
     }
 
-    /** AVL insert. Returns false (and changes nothing) if the key already exists. */
+    // AVL insert. Returns false (and changes nothing) if the key already exists.
     public boolean insert(K key, V value) {
         inserted = false;
         root = insert(root, key, value);
@@ -45,7 +45,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         return n;
     }
 
-    /** Remove the node with the given key and rebalance. Returns true if a node was removed. */
+    // Remove the node with the given key and rebalance. Returns true if a node was removed.
     public boolean remove(K key) {
         boolean[] removed = { false };
         root = remove(root, key, removed);
