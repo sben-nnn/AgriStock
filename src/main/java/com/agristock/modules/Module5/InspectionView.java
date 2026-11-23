@@ -18,7 +18,11 @@ public class InspectionView extends View {
     private final TableView<Batch> queueTable = UI.table();
     private final TableView<Batch> inspectedTable = UI.table();
     private final ComboBox<BatchStatus> status = new ComboBox<>();
-    private TextField grade, notes, unitValue;
+    private final ComboBox<String> grade = new ComboBox<>();
+    private TextField notes, unitValue;
+
+    // Grade options offered as a selection, consistent with Module 4 harvest stock grading.
+    private static final List<String> GRADES = List.of("A", "B", "C", "D", "E", "F");
     private final InspectionService inspectionService;
 
     public InspectionView(Ctx ctx) {
@@ -36,7 +40,7 @@ public class InspectionView extends View {
         f.add("Status", status);
         status.getItems().addAll(BatchStatus.ACCEPTED, BatchStatus.DOWNGRADED, BatchStatus.REJECTED);
         status.setValue(BatchStatus.ACCEPTED);
-        grade = f.text("Grade");
+        grade = f.combo("Grade", GRADES);
         notes = f.text("Notes (required if not accepted)");
         unitValue = f.text("Unit Value (per kg)");
         f.wide(UI.btn("Inspect Front Batch", "primary", this::inspectFront));
@@ -94,13 +98,13 @@ public class InspectionView extends View {
         }
         BatchStatus sel = status.getValue();
         if (sel == null) throw new AgriException("Select an inspection result.");
-        String g = grade.getText();
+        String g = grade.getValue();
         String n = notes.getText();
         double uv = 0;
         String uvText = unitValue.getText().trim();
         if (!uvText.isEmpty()) uv = UI.num(unitValue, "Unit Value");
         inspectionService.inspect(sel, g, n, uv);
-        grade.clear(); notes.clear(); unitValue.clear();
+        grade.setValue(null); notes.clear(); unitValue.clear();
         refresh();
     }
 
