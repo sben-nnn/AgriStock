@@ -75,7 +75,9 @@ public class StockView extends View {
         editCategory = editF.combo("Category", Arrays.asList(AgriStockSystem.CATEGORIES));
         editExpiry = editF.date("Expiry", null);
         editValue = editF.text("Unit Value", "e.g. 120.00");
-        editF.wide(UI.btn("Save Changes", "secondary", this::editItem));
+        editF.wide(UI.buttons(
+                UI.btn("Save Changes", "secondary", this::editItem),
+                UI.btn("Delete Item", "danger", this::deleteItem)));
         editSelect.valueProperty().addListener((o, a, id) -> {
             StockItem s = id == null ? null : sys.searchStock(id);
             if (s == null) return;
@@ -141,6 +143,15 @@ public class StockView extends View {
         if (id == null) throw new AgriException("Select an item to edit.");
         if (editCategory.getValue() == null) throw new AgriException("Select a category.");
         sys.editItem(id, editCategory.getValue(), editExpiry.getValue(), UI.num(editValue, "Unit Value"));
+        refreshAll();
+    }
+
+    private void deleteItem() {
+        String id = editSelect.getValue();
+        if (id == null) throw new AgriException("Select an item to delete.");
+        if (!UI.confirm("Delete stock item " + id + "?")) return;
+        sys.deleteItem(id);
+        editSelect.setValue(null);
         refreshAll();
     }
 
