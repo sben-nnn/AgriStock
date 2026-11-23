@@ -114,7 +114,7 @@ public class BatchesView extends View {
         UI.col(batchTable, "Qty (kg)", b -> String.format("%,.2f", b.quantityKg));
         UI.col(batchTable, "Harvest", b -> b.harvestDate.toString());
         UI.col(batchTable, "Expiry", b -> b.expiryDate.toString());
-        VBox batchCard = UI.card(UI.cardTitle("Batches (AVL tree)"), batchTable);
+        VBox batchCard = UI.card(UI.cardTitle("Batches"), batchTable);
         VBox.setVgrow(batchTable, Priority.ALWAYS);
         VBox.setVgrow(batchCard, Priority.ALWAYS);
         VBox tab3 = new VBox(12, batchPane, batchCard);
