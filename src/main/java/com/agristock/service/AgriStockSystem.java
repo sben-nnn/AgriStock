@@ -549,7 +549,7 @@ public class AgriStockSystem {
         return s != null && qty > 0 && !s.expiryDate.isBefore(today()) && qty <= s.available() + 0.0001;
     }
 
-    public Sale createSale(String buyer, String itemId, double qty, double unitPrice, String ref) {
+    public Sale createSale(String buyer, String itemId, double qty, double unitPrice) {
         require(Feature.SALES);
         if (buyer.trim().isEmpty()) throw new AgriException("Buyer name is required.");
         StockItem s = mustFindStock(itemId);
@@ -557,7 +557,7 @@ public class AgriStockSystem {
         validateStockMovement(s, qty, "SALE");
         reserveStock(itemId, qty);
         Sale sale = new Sale();
-        sale.ref = ref == null || ref.trim().isEmpty() ? String.format("SO-%04d", ++saleCounter) : ref.trim();
+        sale.ref = String.format("SO-%04d", ++saleCounter);
         if (sales.linearSearch(x -> x.ref.equalsIgnoreCase(sale.ref)) != null) { releaseReservation(itemId, qty); throw new AgriException("Reference number already used."); }
         sale.buyer = buyer.trim(); sale.itemId = itemId; sale.crop = s.crop; sale.qty = qty; sale.unitPrice = unitPrice; sale.date = today();
         sales.addFirst(sale);
