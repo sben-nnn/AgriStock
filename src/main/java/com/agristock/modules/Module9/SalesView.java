@@ -23,7 +23,7 @@ public class SalesView extends View {
     private final TableView<Sale> pendingTable = UI.table();
     private final TableView<Sale> salesTable = UI.table();
     private final ComboBox<String> itemSelect = new ComboBox<>();
-    private TextField buyer, saleQty, unitPrice, saleRef;
+    private TextField buyer, saleQty, unitPrice;
 
     public SalesView(Ctx ctx) {
         super(ctx);
@@ -42,7 +42,6 @@ public class SalesView extends View {
         f.add("Item / Batch", itemSelect);
         saleQty = f.text("Qty (kg)");
         unitPrice = f.text("Unit Price");
-        saleRef = f.text("Reference No. (optional)");
         f.wide(UI.btn("Create Sale Order", "primary", this::createSale));
 
         VBox createCard = UI.card(UI.cardTitle("Create Sale Order"), f.grid);
@@ -109,14 +108,11 @@ public class SalesView extends View {
             if (iid == null) throw new AgriException("Select an item / batch.");
             double qty = UI.num(saleQty, "Qty");
             double price = UI.num(unitPrice, "Unit Price");
-            String ref = saleRef.getText().trim();
-            ref = ref.isEmpty() ? null : ref;
 
-            sys.createSale(b, iid, qty, price, ref);
+            sys.createSale(b, iid, qty, price);
             buyer.clear();
             saleQty.clear();
             unitPrice.clear();
-            saleRef.clear();
             refresh();
         } catch (AgriException ex) {
             UI.error(ex.getMessage());
