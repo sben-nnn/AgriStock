@@ -62,9 +62,9 @@ public class StockView extends View {
         crop.setEditable(true);
         crop.setPromptText("Select or type a crop");
         category = addF.combo("Category", Arrays.asList(AgriStockSystem.CATEGORIES));
-        harvestedQty = addF.text("Qty (kg)");
+        harvestedQty = addF.text("Qty (kg)", "300");
         expiryDate = addF.date("Expiry", LocalDate.now().plusDays(7));
-        unitValue = addF.text("Unit Value");
+        unitValue = addF.text("Unit Value", "120.00");
         addF.wide(UI.btn("Add Stock Item", "primary", this::addItem));
         VBox addCard = UI.card(UI.cardTitle("Add Stock Item"), addF.grid);
         addCard.setPrefWidth(380);
@@ -74,7 +74,7 @@ public class StockView extends View {
         editF.add("Item", editSelect);
         editCategory = editF.combo("Category", Arrays.asList(AgriStockSystem.CATEGORIES));
         editExpiry = editF.date("Expiry", null);
-        editValue = editF.text("Unit Value");
+        editValue = editF.text("Unit Value", "120.00");
         editF.wide(UI.btn("Save Changes", "secondary", this::editItem));
         editSelect.valueProperty().addListener((o, a, id) -> {
             StockItem s = id == null ? null : sys.searchStock(id);
@@ -89,8 +89,8 @@ public class StockView extends View {
         // ---------- Left panel: reserve / release ----------
         UI.Form adjF = new UI.Form();
         adjF.add("Item", itemSelect);
-        reserveQty = adjF.text("Reserve (kg)");
-        releaseQty = adjF.text("Release (kg)");
+        reserveQty = adjF.text("Reserve (kg)", "50");
+        releaseQty = adjF.text("Release (kg)", "50");
         adjF.wide(UI.btn("Reserve", "secondary", this::reserve));
         adjF.wide(UI.btn("Release", "secondary", this::release));
         VBox adjCard = UI.card(UI.cardTitle("Reserve / Release Stock"), adjF.grid);
