@@ -21,8 +21,8 @@ public class UserView extends View {
     private void build() {
         header("1 - User & Role Management", "");
         UI.Form f = new UI.Form();
-        username = f.text("Username", "jdoe");
-        fullName = f.text("Full name", "Juan Dela Cruz");
+        username = f.text("Username", "e.g. jdoe");
+        fullName = f.text("Full name", "e.g. Juan Dela Cruz");
         password = f.password("Password");
         password.setPromptText("••••••••");
         role.getItems().addAll(Role.values()); role.setValue(Role.INVENTORY);

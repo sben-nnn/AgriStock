@@ -41,8 +41,8 @@ public class InspectionView extends View {
         status.getItems().addAll(BatchStatus.ACCEPTED, BatchStatus.DOWNGRADED, BatchStatus.REJECTED);
         status.setValue(BatchStatus.ACCEPTED);
         grade = f.combo("Grade", GRADES);
-        notes = f.text("Notes (required if not accepted)", "Minor blemishes, sold as grade B");
-        unitValue = f.text("Unit Value (per kg)", "45.00");
+        notes = f.text("Notes (required if not accepted)", "e.g. Minor blemishes, sold as grade B");
+        unitValue = f.text("Unit Value (per kg)", "e.g. 45.00");
         f.wide(UI.btn("Inspect Front Batch", "primary", this::inspectFront));
         VBox inspectCard = UI.card(UI.cardTitle("Inspect Next Batch"), f.grid);
         inspectCard.setPrefWidth(380);

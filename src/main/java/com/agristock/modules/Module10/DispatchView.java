@@ -36,8 +36,8 @@ public class DispatchView extends View {
         UI.Form schedF = new UI.Form();
         schedF.add("Sale Order", saleSelect);
         deadlinePicker = schedF.date("Deadline", LocalDate.now().plusDays(2));
-        vehicle = schedF.text("Vehicle", "Truck TRK-101");
-        destination = schedF.text("Destination", "Metro Market, Quezon City");
+        vehicle = schedF.text("Vehicle", "e.g. Truck TRK-101");
+        destination = schedF.text("Destination", "e.g. Metro Market, Quezon City");
         urgencySelect.getItems().addAll("1 - High", "2 - Normal", "3 - Low");
         urgencySelect.setValue("2 - Normal");
         schedF.add("Urgency", urgencySelect);
@@ -48,7 +48,7 @@ public class DispatchView extends View {
         // ---------- Left panel: dispatch / receipt ----------
         UI.Form dispF = new UI.Form();
         dispF.add("Delivery", dispatchSelect);
-        receivedQty = dispF.text("Received Qty (kg)", "98");
+        receivedQty = dispF.text("Received Qty (kg)", "e.g. 98");
         dispF.wide(UI.btn("Record Dispatch (EDF)", "secondary", this::recordDispatch));
         dispF.wide(UI.btn("Confirm Receipt", "secondary", this::confirmReceipt));
         VBox dispCard = UI.card(UI.cardTitle("Dispatch / Receipt"), dispF.grid);

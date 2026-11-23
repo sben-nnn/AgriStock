@@ -32,13 +32,13 @@ public class ForecastView extends View {
         UI.Form h = new UI.Form();
         h.add("Crop", crop);
         season = h.text("Season", "e.g. 2026 Wet");
-        yield = h.text("Yield (kg)", "1500");
-        demand = h.text("Demand (kg)", "optional");
+        yield = h.text("Yield (kg)", "e.g. 1500");
+        demand = h.text("Demand (kg)", "e.g. 2000 (optional)");
         h.wide(UI.btn("Add history record", "secondary", this::addHistory));
         UI.Form f = new UI.Form();
         window = f.text("Window (seasons)", "e.g. 3"); window.setText("3");
         ratio = f.text("Seed ratio (%)", "e.g. 12"); ratio.setText("12");
-        seedCost = f.text("Seed cost / kg", "₱80"); seedCost.setText("80");
+        seedCost = f.text("Seed cost / kg", "e.g. ₱80"); seedCost.setText("80");
         f.wide(UI.btn("Forecast seed need", "primary", this::forecast));
         out.setEditable(false); out.setPrefRowCount(8); out.getStyleClass().add("mono");
         f.wide(out);

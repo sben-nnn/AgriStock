@@ -52,9 +52,9 @@ public class BatchesView extends View {
         // ---- Tab 1: Register Farm (form + list in one tab, nothing blocked) ----
         UI.Form f1 = new UI.Form();
         f1.wide(nextFarmId = new Label());
-        farmName = f1.text("Name", "Sunrise Farm");
-        farmLocation = f1.text("Location", "Brgy. San Isidro");
-        farmSize = f1.text("Size (ha)", "2.5");
+        farmName = f1.text("Name", "e.g. Sunrise Farm");
+        farmLocation = f1.text("Location", "e.g. Brgy. San Isidro");
+        farmSize = f1.text("Size (ha)", "e.g. 2.5");
         f1.wide(UI.btn("Register Farm", "primary", this::registerFarm));
         VBox farmPane = new VBox(12, f1.grid);
         farmPane.setPadding(new Insets(12));
@@ -71,7 +71,7 @@ public class BatchesView extends View {
 
         // ---- Tab 2: Register Crop (form + list in one tab) ----
         UI.Form f2 = new UI.Form();
-        cropName = f2.text("Crop Name", "Rice");
+        cropName = f2.text("Crop Name", "e.g. Rice");
         cropVariety = new ComboBox<>(FXCollections.observableArrayList(VARIETIES));
         cropVariety.setEditable(true);
         cropVariety.setPromptText("Select or type a variety");
@@ -95,10 +95,10 @@ public class BatchesView extends View {
         f3.wide(nextBatchId = new Label());
         f3.add("Farm ID", farmSelect);
         f3.add("Crop", cropSelect);
-        batchWorker = f3.text("Worker", "Ramon Santos");
+        batchWorker = f3.text("Worker", "e.g. Ramon Santos");
         batchHarvest = f3.date("Harvest Date", LocalDate.now());
         batchExpiry = f3.date("Expiry Date", LocalDate.now().plusDays(7));
-        batchQty = f3.text("Qty", "1000");
+        batchQty = f3.text("Qty", "e.g. 1000");
         batchUnit = f3.combo("Unit", Arrays.asList(AgriStockSystem.UNITS));
         batchUnit.setValue("kg");
         f3.wide(UI.btn("Create Batch", "primary", this::createBatch));

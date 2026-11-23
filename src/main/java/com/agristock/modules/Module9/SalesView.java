@@ -37,11 +37,11 @@ public class SalesView extends View {
 
         // ---------- Left panel: create sale ----------
         UI.Form f = new UI.Form();
-        buyer = f.text("Buyer", "Metro Market");
+        buyer = f.text("Buyer", "e.g. Metro Market");
         itemSelect.setMaxWidth(Double.MAX_VALUE);
         f.add("Item / Batch", itemSelect);
-        saleQty = f.text("Qty (kg)", "100");
-        unitPrice = f.text("Unit Price", "60.00");
+        saleQty = f.text("Qty (kg)", "e.g. 100");
+        unitPrice = f.text("Unit Price", "e.g. 60.00");
         f.wide(UI.btn("Create Sale Order", "primary", this::createSale));
 
         VBox createCard = UI.card(UI.cardTitle("Create Sale Order"), f.grid);
