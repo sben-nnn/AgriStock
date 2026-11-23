@@ -267,6 +267,77 @@ public class AgriStockSystem {
 
     public Farm farmOfBatch(Batch b) { return findFarm(b.farmId); }
 
+    // ---- MODULE 3: edit & delete farms, crops and batches ----
+    public void editFarm(String id, String name, String location, double size) {
+        require(Feature.BATCHES);
+        Farm f = findFarm(id);
+        if (f == null) throw new AgriException("Farm not found.");
+        if (name.trim().isEmpty()) throw new AgriException("Farm name is required.");
+        if (size <= 0) throw new AgriException("Farm size must be greater than zero (hectares).");
+        f.name = name.trim(); f.location = location.trim(); f.size = size;
+        logAuditTrail("ADJUSTMENT", id, 0, 0, "Farm details edited");
+    }
+
+    public void deleteFarm(String id) {
+        require(Feature.BATCHES);
+        if (findFarm(id) == null) throw new AgriException("Farm not found.");
+        for (Batch b : batches.toSortedArray())
+            if (b.farmId.equalsIgnoreCase(id)) throw new AgriException("Cannot delete farm: batches are still registered to it.");
+        farms.remove(f -> f.id.equalsIgnoreCase(id));
+        logAuditTrail("ADJUSTMENT", id, 0, 0, "Farm deleted");
+    }
+
+    public void editCrop(String name, String variety, String category, String newName, String newVariety, String newCategory) {
+        require(Feature.BATCHES);
+        Crop c = crops.linearSearch(x -> x.name.equalsIgnoreCase(name) && x.variety.equalsIgnoreCase(variety));
+        if (c == null) throw new AgriException("Crop not found.");
+        if (newName.trim().isEmpty() || newVariety.trim().isEmpty() || newCategory == null)
+            throw new AgriException("Crop name, variety and category are required.");
+        if (!name.equalsIgnoreCase(newName.trim()) || !variety.equalsIgnoreCase(newVariety.trim())) {
+            if (crops.linearSearch(x -> x.name.equalsIgnoreCase(newName.trim()) && x.variety.equalsIgnoreCase(newVariety.trim())) != null)
+                throw new AgriException("That crop variety is already registered.");
+        }
+        c.name = newName.trim(); c.variety = newVariety.trim(); c.category = newCategory;
+        logAuditTrail("ADJUSTMENT", newName.trim(), 0, 0, "Crop details edited");
+    }
+
+    public void deleteCrop(String name, String variety) {
+        require(Feature.BATCHES);
+        Crop c = crops.linearSearch(x -> x.name.equalsIgnoreCase(name) && x.variety.equalsIgnoreCase(variety));
+        if (c == null) throw new AgriException("Crop not found.");
+        for (Batch b : batches.toSortedArray())
+            if (b.crop.equalsIgnoreCase(name) && b.variety.equalsIgnoreCase(variety))
+                throw new AgriException("Cannot delete crop: batches are still registered to it.");
+        crops.remove(x -> x.name.equalsIgnoreCase(name) && x.variety.equalsIgnoreCase(variety));
+        logAuditTrail("ADJUSTMENT", name, 0, 0, "Crop deleted");
+    }
+
+    public void editBatch(String batchId, String farmId, String crop, String variety, String worker,
+                          LocalDate harvest, LocalDate expiry, double qty, String unit) {
+        require(Feature.BATCHES);
+        Batch b = batches.search(batchId);
+        if (b == null) throw new AgriException("Batch not found.");
+        if (findFarm(farmId == null ? "" : farmId) == null) throw new AgriException("Select a registered farm.");
+        if (harvest == null || expiry == null) throw new AgriException("Harvest date and expiry date are required.");
+        if (!expiry.isAfter(harvest)) throw new AgriException("Expiry date must be after the harvest date.");
+        if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
+        b.farmId = farmId; b.crop = crop; b.variety = variety; b.worker = worker == null ? "" : worker.trim();
+        b.originalQty = qty; b.quantityKg = convertUnit(qty, unit);
+        b.harvestDate = harvest; b.expiryDate = expiry; b.unit = unit;
+        logAuditTrail("ADJUSTMENT", batchId, qty, 0, "Batch details edited");
+    }
+
+    public void deleteBatch(String batchId) {
+        require(Feature.BATCHES);
+        Batch b = batches.search(batchId);
+        if (b == null) throw new AgriException("Batch not found.");
+        if (findStockRecord(batchId) != null) throw new AgriException("Cannot delete batch: harvest stock is already recorded for it.");
+        if (stock.search(batchId) != null) throw new AgriException("Cannot delete batch: it already exists in stock.");
+        for (Batch q : inspectionQueue) if (q.batchId.equals(batchId)) throw new AgriException("Cannot delete batch: it is awaiting inspection.");
+        batches.remove(batchId);
+        logAuditTrail("ADJUSTMENT", batchId, 0, 0, "Batch deleted");
+    }
+
     // MODULE 4: Harvest Stock Recording (Linked List + Linear Search)
     public StockRecord findStockRecord(String batchId) { return stockRecords.linearSearch(r -> r.batchId.equals(batchId)); }
 
@@ -305,6 +376,45 @@ public class AgriStockSystem {
         if (r == null) throw new AgriException("No stock record for batch " + batchId);
         if (qty <= 0 || qty > r.saleableQty) throw new AgriException("Invalid rejected quantity.");
         r.rejectedQty += qty; r.saleableQty -= qty; r.rejectReason = reason;
+    }
+
+    // ---- MODULE 4: edit & delete stock records ----
+    public void editStockRecord(String batchId, double harvested, double rejected, String grade,
+                                String ripeness, String rejectReason) {
+        require(Feature.HARVEST_STOCK);
+        StockRecord r = findStockRecord(batchId);
+        if (r == null) throw new AgriException("No stock record for batch " + batchId + ".");
+        Batch b = batches.search(batchId);
+        if (b != null && b.status != BatchStatus.REGISTERED)
+            throw new AgriException("Cannot edit: this batch has already been inspected.");
+        validateQuantity(harvested, rejected);
+        if (b != null && harvested > b.quantityKg + 0.0001)
+            throw new AgriException("Harvested quantity cannot exceed the registered batch quantity ("
+                    + String.format("%.2f", b.quantityKg) + " kg).");
+        if (rejected > 0 && (rejectReason == null || rejectReason.trim().isEmpty()))
+            throw new AgriException("Enter a reason for the rejected/damaged produce.");
+        r.harvestedQty = harvested;
+        r.rejectedQty = rejected;
+        r.saleableQty = harvested - rejected;
+        r.grade = grade; r.ripeness = ripeness;
+        r.rejectReason = rejectReason == null ? "" : rejectReason.trim();
+        if (b != null) b.grade = grade;
+        logAuditTrail("ADJUSTMENT", batchId, harvested, 0, "Harvest stock record edited");
+    }
+
+    public void deleteStockRecord(String batchId) {
+        require(Feature.HARVEST_STOCK);
+        StockRecord r = findStockRecord(batchId);
+        if (r == null) throw new AgriException("No stock record for batch " + batchId + ".");
+        Batch b = batches.search(batchId);
+        if (b != null && b.status != BatchStatus.REGISTERED)
+            throw new AgriException("Cannot delete: this batch has already been inspected.");
+        if (b != null) {
+            for (Batch q : inspectionQueue)
+                if (q.batchId.equals(batchId)) inspectionQueue.remove(q);
+        }
+        stockRecords.remove(x -> x.batchId.equals(batchId));
+        logAuditTrail("ADJUSTMENT", batchId, 0, 0, "Harvest stock record deleted");
     }
 
     // MODULE 5: Quality Inspection & Grading (Queue, FIFO scheduling)
@@ -379,6 +489,53 @@ public class AgriStockSystem {
         logAuditTrail("TRANSFER", e.batchId, e.qty, 0, "Storage conditions updated: " + e.conditions);
     }
 
+    // ---- MODULE 6: edit & delete storage entries ----
+    public void editStorageEntry(StorageEntry e, int locationIndex, double qty, LocalDate date, String conditions) {
+        require(Feature.STORAGE);
+        if (locationIndex < 0 || locationIndex >= locations.length) throw new AgriException("Invalid storage location.");
+        if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
+        if (date == null) throw new AgriException("Storage date is required.");
+        StockItem s = stock.search(e.batchId == null ? "" : e.batchId);
+        double otherStored = 0;
+        for (StorageEntry x : rotationQueue)
+            if (x != e && x.batchId.equals(e.batchId)) otherStored += x.qty;
+        if (s != null && qty > Math.max(0, s.remaining - otherStored) + 0.0001)
+            throw new AgriException("Only " + String.format("%.2f", Math.max(0, s.remaining - otherStored))
+                    + " kg of this batch is not stored elsewhere.");
+        double delta = qty - e.qty;
+        e.location = locations[locationIndex]; e.qty = qty; e.storageDate = date;
+        e.conditions = conditions == null ? "" : conditions.trim();
+        if (s != null) {
+            s.stored += delta;
+            s.location = "Multiple";
+            rebuildStockLocation(s);
+        }
+        logAuditTrail("ADJUSTMENT", e.batchId, qty, 0, "Storage entry edited");
+    }
+
+    public void deleteStorageEntry(StorageEntry e) {
+        require(Feature.STORAGE);
+        rotationQueue.remove(e);
+        StockItem s = stock.search(e.batchId == null ? "" : e.batchId);
+        if (s != null) {
+            s.stored -= e.qty;
+            if (s.stored < 0) s.stored = 0;
+            rebuildStockLocation(s);
+        }
+        logAuditTrail("ADJUSTMENT", e.batchId, e.qty, 0, "Storage entry deleted");
+    }
+
+    private void rebuildStockLocation(StockItem s) {
+        String loc = "Unassigned";
+        boolean first = true;
+        for (StorageEntry e : rotationQueue) {
+            if (!e.batchId.equals(s.itemId)) continue;
+            if (first) { loc = e.location; first = false; }
+            else if (!loc.equals(e.location)) { loc = "Multiple"; break; }
+        }
+        s.location = loc;
+    }
+
     // FIFO rotation: the oldest stored lot is moved to the front for use, then re-queued at the back.
     public StorageEntry rotateStockFIFO() {
         require(Feature.STORAGE);
@@ -414,6 +571,27 @@ public class AgriStockSystem {
         s.category = category; s.expiryDate = expiry; s.unitValue = unitValue;
         rebuildExpiryHeap();
         logAuditTrail("ADJUSTMENT", itemId, s.remaining, 0, "Item details edited");
+    }
+
+    // ---- MODULE 7: delete stock item ----
+    public void deleteItem(String itemId) {
+        require(Feature.STOCK_EDIT);
+        StockItem s = mustFindStock(itemId);
+        if (s.remaining > 0.0001)
+            throw new AgriException("Cannot delete item: " + String.format("%.2f", s.remaining)
+                    + " kg still remains in stock.");
+        if (s.reserved > 0.0001) throw new AgriException("Cannot delete item: it has reserved stock.");
+        for (Sale sale : sales) if (sale.itemId.equals(itemId))
+            throw new AgriException("Cannot delete item: sales records reference it.");
+        for (Sale sale : pendingSales) if (sale.itemId.equals(itemId))
+            throw new AgriException("Cannot delete item: a pending sale references it.");
+        for (Delivery d : deliveries) if (d.itemId.equals(itemId))
+            throw new AgriException("Cannot delete item: delivery records reference it.");
+        for (Spoilage sp : spoilage) if (sp.itemId.equals(itemId))
+            throw new AgriException("Cannot delete item: spoilage records reference it.");
+        stock.remove(itemId);
+        rebuildExpiryHeap();
+        logAuditTrail("ADJUSTMENT", itemId, 0, 0, "Stock item deleted");
     }
 
     public DynamicArray<StockItem> traverseInventory() { return stock.toSortedArray(); }   // in-order traversal
