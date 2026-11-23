@@ -16,7 +16,12 @@ import java.util.List;
 public class HarvestStockView extends View {
     private final TableView<StockRecord> recordTable = UI.table();
     private final ComboBox<String> batchSelect = new ComboBox<>();
-    private TextField harvestedQty, rejectedQty, grade, ripeness, rejectReason;
+    private TextField harvestedQty, rejectedQty, rejectReason;
+    private ComboBox<String> grade, ripeness;
+
+    // Grade and ripeness options offered as selections.
+    private static final List<String> GRADES = List.of("A", "B", "C", "D", "E", "F");
+    private static final List<String> RIPENESS = List.of("N/A", "Ripe", "Unripe");
 
     public HarvestStockView(Ctx ctx) { super(ctx); build(); }
 
@@ -26,8 +31,8 @@ public class HarvestStockView extends View {
         f.add("Batch ID", batchSelect);
         harvestedQty = f.text("Harvested Qty (kg)");
         rejectedQty = f.text("Rejected Qty (kg)");
-        grade = f.text("Grade");
-        ripeness = f.text("Ripeness");
+        grade = f.combo("Grade", GRADES);
+        ripeness = f.combo("Ripeness", RIPENESS);
         rejectReason = f.text("Reject Reason");
         f.wide(UI.btn("Record Stock", "primary", this::recordStock));
 
@@ -52,8 +57,8 @@ public class HarvestStockView extends View {
         if (bid == null) throw new AgriException("Select a batch.");
         double harvested = UI.num(harvestedQty, "Harvested Qty");
         double rejected = UI.num(rejectedQty, "Rejected Qty");
-        sys.recordHarvestedStock(bid, harvested, rejected, grade.getText(), ripeness.getText(), rejectReason.getText());
-        harvestedQty.clear(); rejectedQty.clear(); grade.clear(); ripeness.clear();
+        sys.recordHarvestedStock(bid, harvested, rejected, grade.getValue(), ripeness.getValue(), rejectReason.getText());
+        harvestedQty.clear(); rejectedQty.clear(); grade.setValue(null); ripeness.setValue(null);
         rejectReason.clear();
         refresh();
     }
