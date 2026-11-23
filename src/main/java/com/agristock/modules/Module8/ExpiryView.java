@@ -33,7 +33,7 @@ public class ExpiryView extends View {
         // ---------- Left panel: FEFO dispatch ----------
         UI.Form fefoF = new UI.Form();
         fefoF.add("Crop", cropSelect);
-        fefoQty = fefoF.text("Qty (kg)");
+        fefoQty = fefoF.text("Qty (kg)", "100");
         fefoF.wide(UI.btn("Dispatch FEFO", "primary", this::dispatchFefo));
         VBox fefoCard = UI.card(UI.cardTitle("FEFO Dispatch"), fefoF.grid);
         fefoCard.setPrefWidth(380);
