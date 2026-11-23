@@ -37,11 +37,12 @@ import java.util.List;
 // AgriStock - Agricultural Stock Management System (JavaFX front end)
 public class MainApp extends Application {
     private final AgriStockSystem sys = new AgriStockSystem();
-    private final Ctx ctx = new Ctx(sys, this::refreshCurrent);
+    private final Ctx ctx = new Ctx(sys, this::refreshAll);
     private Stage stage;
     private boolean loadFailed;
     private ListView<View> nav;
     private StackPane content;
+    private List<View> allViews;
 
     @Override
     public void start(Stage primary) {
@@ -96,6 +97,7 @@ public class MainApp extends Application {
                 new DashboardView(ctx), new UserView(ctx), new BatchesView(ctx), new HarvestStockView(ctx),
                 new InspectionView(ctx), new StorageView(ctx), new StockView(ctx), new ExpiryView(ctx), new SalesView(ctx),
                 new DispatchView(ctx), new SpoilageView(ctx), new ForecastView(ctx), new ReportsView(ctx), new AuditView(ctx)));
+        allViews = all;
         // Each process (module) is hidden unless the signed-in user's role is permitted to use it.
         // Dashboard (feature == null) is visible to everyone; every other screen is gated by its
         // Feature so a role never sees processes it must not use.
@@ -131,9 +133,10 @@ public class MainApp extends Application {
         nav.getSelectionModel().selectFirst();
     }
 
-    private void refreshCurrent() {
-        View v = nav.getSelectionModel().getSelectedItem();
-        if (v != null) v.refresh();
+    /** Refresh all module views so every table reflects the latest data immediately. */
+    private void refreshAll() {
+        if (allViews == null) return;
+        for (View v : allViews) v.refresh();
     }
 
     private void save() {
@@ -147,7 +150,7 @@ public class MainApp extends Application {
     private void loadSample() {
         if (!UI.confirm("Load demo farmers, batches, sales and deliveries?\n\nThis REPLACES all existing farms, crops, batches, stock, sales, deliveries and spoilage records with demo data. User accounts and the audit trail are kept.")) return;
         SampleData.load(sys);
-        refreshCurrent();
+        refreshAll();
         UI.info("Sample data", "Demo data loaded. Browse the modules to explore it.");
     }
 

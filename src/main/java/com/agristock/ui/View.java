@@ -17,6 +17,9 @@ public abstract class View extends VBox {
     public Feature feature() { return null; }
     public abstract void refresh();
 
+    /** Refresh every view so all module tables stay in sync after any data change. */
+    protected void refreshAll() { ctx.reloadAll.run(); }
+
     protected void header(String heading, String sub) {
         getChildren().add(UI.heading(heading));
         if (sub != null && !sub.isBlank()) getChildren().add(UI.subtitle(sub));
