@@ -10,7 +10,6 @@ import com.agristock.ds.DynamicArray;
 import com.agristock.ui.View;
 import com.agristock.ui.UI;
 import com.agristock.ui.Ctx;
-import com.agristock.service.AgriStockSystem;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
