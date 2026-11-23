@@ -26,8 +26,8 @@ public class AuditView extends View {
         header("14 - Inventory Audit & Validation", "Physical counts are compared with recorded counts. Every transaction is appended to an immutable audit trail; invalid movements are rejected and logged.");
         UI.Form f = new UI.Form();
         f.add("Batch", item);
-        physical = f.text("Physical count (kg)");
-        note = f.text("Note");
+        physical = f.text("Physical count (kg)", "980");
+        note = f.text("Note", "Counted during morning shift");
         result.setWrapText(true); result.getStyleClass().add("card-title");
         f.wide(result);
 
