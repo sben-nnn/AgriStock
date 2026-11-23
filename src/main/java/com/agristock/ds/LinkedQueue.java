@@ -3,7 +3,7 @@ package com.agristock.ds;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** FIFO queue built on linked nodes: inspection (M5), storage rotation (M6), pending sales (M9). */
+// FIFO queue built on linked nodes: inspection (M5), storage rotation (M6), pending sales (M9).
 public class LinkedQueue<T> implements Iterable<T> {
     private static class Node<T> {
         T data; Node<T> next;
@@ -31,7 +31,7 @@ public class LinkedQueue<T> implements Iterable<T> {
 
     public T peek() { return front == null ? null : front.data; }
 
-    /** Remove a specific element (used when a pending sale is cancelled). */
+    // Remove a specific element (used when a pending sale is cancelled).
     public boolean remove(T v) {
         Node<T> prev = null;
         for (Node<T> c = front; c != null; prev = c, c = c.next) {
@@ -48,7 +48,7 @@ public class LinkedQueue<T> implements Iterable<T> {
     public int size() { return size; }
     public boolean isEmpty() { return size == 0; }
 
-    /** Remove all elements from the queue. */
+    // Remove all elements from the queue.
     public void clear() {
         front = rear = null;
         size = 0;

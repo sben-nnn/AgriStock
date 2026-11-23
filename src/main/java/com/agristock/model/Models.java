@@ -5,7 +5,7 @@ import com.agristock.ds.SinglyLinkedList;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/** All record types used by AgriStock (plain data holders). */
+//All record types used by AgriStock (plain data holders).
 public final class Models {
     private Models() {}
 
@@ -16,7 +16,7 @@ public final class Models {
         @Override public String toString() { return label; }
     }
 
-    /** Role-Based Access Control: which roles may use which feature. */
+    // Role-Based Access Control: which roles may use which feature.
     public enum Feature {
         USERS(Role.OWNER),
         BATCHES(Role.OWNER, Role.MANAGER, Role.INVENTORY),

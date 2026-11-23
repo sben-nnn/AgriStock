@@ -3,7 +3,7 @@ package com.agristock.ds;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/** Growable array (Array data structure) used by Forecasting (M12) and Reports (M13). */
+// Growable array (Array data structure) used by Forecasting (M12) and Reports (M13).
 public class DynamicArray<T> implements Iterable<T> {
     private Object[] data = new Object[16];
     private int size;
