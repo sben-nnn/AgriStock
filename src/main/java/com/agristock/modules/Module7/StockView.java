@@ -24,7 +24,8 @@ public class StockView extends View {
     private final ComboBox<String> flagFilter = new ComboBox<>();
     private final ComboBox<String> itemSelect = new ComboBox<>();
     private final ComboBox<String> editSelect = new ComboBox<>();
-    private TextField crop, harvestedQty, unitValue;
+    private final ComboBox<String> crop = new ComboBox<>();
+    private TextField harvestedQty, unitValue;
     private ComboBox<String> category;
     private DatePicker expiryDate;
     private TextField reserveQty, releaseQty;
@@ -57,7 +58,9 @@ public class StockView extends View {
 
         // ---------- Left panel: add stock item ----------
         UI.Form addF = new UI.Form();
-        crop = addF.text("Crop");
+        crop = addF.combo("Crop", FXCollections.observableArrayList());
+        crop.setEditable(true);
+        crop.setPromptText("Select or type a crop");
         category = addF.combo("Category", Arrays.asList(AgriStockSystem.CATEGORIES));
         harvestedQty = addF.text("Qty (kg)");
         expiryDate = addF.date("Expiry", LocalDate.now().plusDays(7));
@@ -122,11 +125,12 @@ public class StockView extends View {
     @Override public Feature feature() { return Feature.STOCK_EDIT; }
 
     private void addItem() {
-        String c = crop.getText();
+        String c = crop.getValue() == null ? "" : crop.getValue().trim();
+        if (c.isEmpty()) throw new AgriException("A crop is required.");
         double qty = UI.num(harvestedQty, "Qty");
         double value = UI.num(unitValue, "Unit Value");
         sys.addItem(c, category.getValue(), qty, expiryDate.getValue(), value);
-        crop.clear(); category.setValue(null);
+        crop.setValue(null); category.setValue(null);
         harvestedQty.clear(); unitValue.clear();
         expiryDate.setValue(LocalDate.now().plusDays(7));
         refresh();
@@ -171,6 +175,11 @@ public class StockView extends View {
         for (StockItem s : sys.traverseInventory()) ids.add(s.itemId);
         UI.setItems(itemSelect, ids);
         UI.setItems(editSelect, ids);
+
+        // Populate crop dropdown from registered crops.
+        List<String> cropNames = new ArrayList<>();
+        for (com.agristock.model.Models.Crop c : sys.crops) cropNames.add(c.name);
+        UI.setItems(crop, cropNames);
 
         UI.fill(stockTable, sys.filterStock(search.getText(), categoryFilter.getValue(), flagFilter.getValue()));
     }
