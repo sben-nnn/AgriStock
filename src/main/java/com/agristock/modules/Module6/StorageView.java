@@ -46,7 +46,7 @@ public class StorageView extends View {
         // ---------- Left panel: storage actions ----------
         VBox actions = new VBox(10,
                 UI.btn("Rotate Stock FIFO (oldest first)", "secondary", this::rotateFifo),
-                UI.btn("Refresh", "ghost", () -> refresh())
+                UI.btn("Refresh", "ghost", this::refreshAll)
         );
         actions.setMaxWidth(Double.MAX_VALUE);
         for (Object o : actions.getChildren()) {
@@ -100,13 +100,13 @@ public class StorageView extends View {
         String conditions = storageConditions.getText();
         sys.assignLocation(bid, loc, qty, date, conditions);
         storageQty.clear(); storageConditions.clear();
-        refresh();
+        refreshAll();
     }
 
     private void rotateFifo() {
         if (!UI.confirm("Move the oldest stored lot to the front of the FIFO queue?")) return;
         sys.rotateStockFIFO();
-        refresh();
+        refreshAll();
     }
 
     @Override public void refresh() {

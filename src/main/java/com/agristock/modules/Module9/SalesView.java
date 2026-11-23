@@ -113,7 +113,7 @@ public class SalesView extends View {
             buyer.clear();
             saleQty.clear();
             unitPrice.clear();
-            refresh();
+            refreshAll();
         } catch (AgriException ex) {
             UI.error(ex.getMessage());
         }
@@ -127,10 +127,10 @@ public class SalesView extends View {
         try {
             int n = sys.processPendingSales();
             UI.info("Processed", "Confirmed " + n + " sale order(s) and released stock.");
-            refresh();
+            refreshAll();
         } catch (AgriException ex) {
             UI.error(ex.getMessage());
-            refresh();
+            refreshAll();
         }
     }
 

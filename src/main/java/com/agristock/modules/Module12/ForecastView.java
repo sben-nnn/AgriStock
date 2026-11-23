@@ -59,7 +59,7 @@ public class ForecastView extends View {
     private void addHistory() {
         double d = demand.getText().trim().isEmpty() ? 0 : UI.num(demand, "Demand");
         svc.addYieldRecord(cropName(), season.getText(), UI.num(yield, "Yield"), d);
-        season.clear(); yield.clear(); demand.clear(); refresh(); showChart();
+        season.clear(); yield.clear(); demand.clear(); refreshAll(); showChart();
     }
 
     private void forecast() {

@@ -49,7 +49,7 @@ public class InspectionView extends View {
 
         // ---------- Left panel: actions ----------
         VBox actions = new VBox(10,
-                UI.btn("Refresh", "ghost", () -> refresh())
+                UI.btn("Refresh", "ghost", this::refreshAll)
         );
         actions.setMaxWidth(Double.MAX_VALUE);
         for (Object o : actions.getChildren()) {
@@ -105,7 +105,7 @@ public class InspectionView extends View {
         if (!uvText.isEmpty()) uv = UI.num(unitValue, "Unit Value");
         inspectionService.inspect(sel, g, n, uv);
         grade.setValue(null); notes.clear(); unitValue.clear();
-        refresh();
+        refreshAll();
     }
 
     @Override public void refresh() {

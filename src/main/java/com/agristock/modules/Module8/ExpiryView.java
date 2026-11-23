@@ -41,8 +41,8 @@ public class ExpiryView extends View {
         // ---------- Left panel: expiry actions ----------
         VBox actions = new VBox(10,
                 UI.btn("Check & Purge Expired Stock", "danger", this::purgeExpired),
-                UI.btn("Rebuild Expiry Heap", "secondary", () -> { sys.rebuildExpiryHeap(); refresh(); }),
-                UI.btn("Refresh", "ghost", () -> refresh())
+                UI.btn("Rebuild Expiry Heap", "secondary", () -> { sys.rebuildExpiryHeap(); refreshAll(); }),
+                UI.btn("Refresh", "ghost", this::refreshAll)
         );
         actions.setMaxWidth(Double.MAX_VALUE);
         for (Object o : actions.getChildren()) {
@@ -101,7 +101,7 @@ public class ExpiryView extends View {
         for (String line : log) sb.append("• ").append(line).append("\n");
         UI.textDialog("FEFO Dispatch Result", sb.toString());
         fefoQty.clear();
-        refresh();
+        refreshAll();
     }
 
     private void purgeExpired() {
@@ -116,7 +116,7 @@ public class ExpiryView extends View {
                     .append(" - ").append(String.format("%,.2f", sp.qty)).append(" kg\n");
         }
         UI.textDialog("Purge Result", sb.toString());
-        refresh();
+        refreshAll();
     }
 
     @Override public void refresh() {

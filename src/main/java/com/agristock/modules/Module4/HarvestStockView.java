@@ -60,7 +60,7 @@ public class HarvestStockView extends View {
         sys.recordHarvestedStock(bid, harvested, rejected, grade.getValue(), ripeness.getValue(), rejectReason.getText());
         harvestedQty.clear(); rejectedQty.clear(); grade.setValue(null); ripeness.setValue(null);
         rejectReason.clear();
-        refresh();
+        refreshAll();
     }
 
     @Override public void refresh() {

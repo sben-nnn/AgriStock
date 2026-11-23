@@ -54,8 +54,8 @@ public class AuditView extends View {
         double diff = svc.compareCounts(UI.idOf(item), UI.num(physical, "Physical count"));
         result.setText(Math.abs(diff) < 0.0001 ? "Counts match - no discrepancy." : String.format("Discrepancy: %+,.2f kg (%s)", diff, diff < 0 ? "shortage" : "surplus"));
     }
-    private void record() { svc.recordDifference(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); compare(); refresh(); }
-    private void reconcile() { svc.reconcile(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); result.setText("Reconciled - recorded stock now equals the physical count."); physical.clear(); refresh(); }
+    private void record() { svc.recordDifference(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); compare(); refreshAll(); }
+    private void reconcile() { svc.reconcile(UI.idOf(item), UI.num(physical, "Physical count"), note.getText()); result.setText("Reconciled - recorded stock now equals the physical count."); physical.clear(); refreshAll(); }
 
     @Override public void refresh() {
         UI.fill(table, svc.auditHistory(filter.getText()));

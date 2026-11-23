@@ -138,7 +138,7 @@ public class BatchesView extends View {
         sys.registerFarm(sys.nextFarmId(), farmName.getText(), farmLocation.getText(),
                 UI.num(farmSize, "Size (ha)"));
         farmName.clear(); farmLocation.clear(); farmSize.clear();
-        refresh();
+        refreshAll();
     }
 
     private void registerCrop() {
@@ -146,7 +146,7 @@ public class BatchesView extends View {
         if (variety.isEmpty()) throw new AgriException("A crop variety is required.");
         sys.registerCrop(cropName.getText(), variety, cropCategory.getValue());
         cropName.clear(); cropVariety.setValue(null); cropCategory.setValue(null);
-        refresh();
+        refreshAll();
     }
 
     private void createBatch() {
@@ -171,7 +171,7 @@ public class BatchesView extends View {
         batchWorker.clear(); batchQty.clear();
         batchHarvest.setValue(LocalDate.now());
         batchExpiry.setValue(LocalDate.now().plusDays(7));
-        refresh();
+        refreshAll();
     }
 
     @Override public void refresh() {

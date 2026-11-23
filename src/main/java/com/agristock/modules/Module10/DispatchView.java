@@ -110,7 +110,7 @@ public class DispatchView extends View {
         int urgency = u == null ? 2 : Integer.parseInt(u.substring(0, 1));
         sys.scheduleDelivery(sale, deadline, v, dest, urgency);
         vehicle.clear(); destination.clear();
-        refresh();
+        refreshAll();
     }
 
     private Sale findSale(String ref) {
@@ -124,7 +124,7 @@ public class DispatchView extends View {
             return;
         }
         sys.recordDispatch();
-        refresh();
+        refreshAll();
     }
 
     private void confirmReceipt() {
@@ -136,7 +136,7 @@ public class DispatchView extends View {
         double qty = UI.num(receivedQty, "Received Qty");
         sys.confirmReceipt(d, qty);
         receivedQty.clear();
-        refresh();
+        refreshAll();
     }
 
     private Delivery findDelivery(String id) {

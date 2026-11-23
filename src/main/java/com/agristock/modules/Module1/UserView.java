@@ -47,29 +47,29 @@ public class UserView extends View {
 
     private void add() {
         sys.addUser(username.getText(), fullName.getText(), password.getText(), role.getValue());
-        password.clear(); refresh();
+        password.clear(); refreshAll();
     }
     private void edit() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
         sys.editUser(u.username, fullName.getText(), password.getText());
-        password.clear(); refresh();
+        password.clear(); refreshAll();
     }
     private void assign() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
-        sys.assignRole(u.username, role.getValue()); refresh();
+        sys.assignRole(u.username, role.getValue()); refreshAll();
     }
     private void toggle() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
-        sys.setUserActive(u.username, !u.active); refresh();
+        sys.setUserActive(u.username, !u.active); refreshAll();
     }
     private void delete() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
         if (!UI.confirm("Delete user '" + u.username + "'?")) return;
-        sys.deleteUser(u.username); refresh();
+        sys.deleteUser(u.username); refreshAll();
     }
 
     @Override public void refresh() {

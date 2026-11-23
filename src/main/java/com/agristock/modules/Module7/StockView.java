@@ -133,7 +133,7 @@ public class StockView extends View {
         crop.setValue(null); category.setValue(null);
         harvestedQty.clear(); unitValue.clear();
         expiryDate.setValue(LocalDate.now().plusDays(7));
-        refresh();
+        refreshAll();
     }
 
     private void editItem() {
@@ -141,7 +141,7 @@ public class StockView extends View {
         if (id == null) throw new AgriException("Select an item to edit.");
         if (editCategory.getValue() == null) throw new AgriException("Select a category.");
         sys.editItem(id, editCategory.getValue(), editExpiry.getValue(), UI.num(editValue, "Unit Value"));
-        refresh();
+        refreshAll();
     }
 
     private void reserve() {
@@ -150,7 +150,7 @@ public class StockView extends View {
         double qty = UI.num(reserveQty, "Reserve Qty");
         sys.reserveManually(id, qty);
         reserveQty.clear();
-        refresh();
+        refreshAll();
     }
 
     private void release() {
@@ -159,7 +159,7 @@ public class StockView extends View {
         double qty = UI.num(releaseQty, "Release Qty");
         sys.releaseManually(id, qty);
         releaseQty.clear();
-        refresh();
+        refreshAll();
     }
 
     @Override public void refresh() {

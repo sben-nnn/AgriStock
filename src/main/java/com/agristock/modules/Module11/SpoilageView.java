@@ -63,7 +63,7 @@ public class SpoilageView extends View {
 
     private void log() {
         Spoilage s = svc.requestAdjustment(UI.idOf(item), UI.num(qty, "Quantity"), reason.getEditor().getText(), reporter.getText());
-        qty.clear(); reporter.clear(); refresh();
+        qty.clear(); reporter.clear(); refreshAll();
         UI.info("Logged", s.id + " is " + s.status + (s.status.equals("PENDING") ? " - waiting for an authorised user." : "."));
     }
 
@@ -71,7 +71,7 @@ public class SpoilageView extends View {
         Spoilage s = table.getSelectionModel().getSelectedItem();
         if (s == null) throw new AgriException("Select a request first.");
         if (approve) svc.approveAdjustment(s); else svc.rejectAdjustment(s);
-        refresh();
+        refreshAll();
     }
 
     @Override public void refresh() {
