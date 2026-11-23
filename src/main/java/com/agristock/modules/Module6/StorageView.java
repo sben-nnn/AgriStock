@@ -36,7 +36,7 @@ public class StorageView extends View {
         UI.Form f = new UI.Form();
         f.add("Batch / Item", batchSelect);
         f.add("Location", locationSelect);
-        storageQty = f.text("Qty (kg)");
+        storageQty = f.text("Qty (kg)", "200");
         storageDate = f.date("Storage Date", LocalDate.now());
         storageConditions = f.text("Conditions", "e.g. 22°C, 60% RH");
         f.wide(UI.btn("Assign Location", "primary", this::assignLocation));
