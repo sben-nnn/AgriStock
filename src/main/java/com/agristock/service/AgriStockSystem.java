@@ -385,7 +385,7 @@ public class AgriStockSystem {
         StockRecord r = findStockRecord(batchId);
         if (r == null) throw new AgriException("No stock record for batch " + batchId + ".");
         Batch b = batches.search(batchId);
-        if (b != null && b.status != BatchStatus.REGISTERED)
+        if (b != null && isInspected(b))
             throw new AgriException("Cannot edit: this batch has already been inspected.");
         validateQuantity(harvested, rejected);
         if (b != null && harvested > b.quantityKg + 0.0001)
@@ -407,14 +407,22 @@ public class AgriStockSystem {
         StockRecord r = findStockRecord(batchId);
         if (r == null) throw new AgriException("No stock record for batch " + batchId + ".");
         Batch b = batches.search(batchId);
-        if (b != null && b.status != BatchStatus.REGISTERED)
+        if (b != null && isInspected(b))
             throw new AgriException("Cannot delete: this batch has already been inspected.");
         if (b != null) {
+            // Awaiting inspection is fine - just pull it back out of the FIFO queue.
             for (Batch q : inspectionQueue)
                 if (q.batchId.equals(batchId)) inspectionQueue.remove(q);
+            b.status = BatchStatus.REGISTERED;
         }
         stockRecords.remove(x -> x.batchId.equals(batchId));
         logAuditTrail("ADJUSTMENT", batchId, 0, 0, "Harvest stock record deleted");
+    }
+
+    /** True only when a batch has passed inspection (a final result was recorded). */
+    private boolean isInspected(Batch b) {
+        return b.status == BatchStatus.ACCEPTED || b.status == BatchStatus.DOWNGRADED
+                || b.status == BatchStatus.REJECTED;
     }
 
     // MODULE 5: Quality Inspection & Grading (Queue, FIFO scheduling)

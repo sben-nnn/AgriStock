@@ -114,6 +114,9 @@ public final class UI {
         ObservableList<T> l = FXCollections.observableArrayList();
         for (T x : items) l.add(x);
         t.setItems(l);
+        // Force a full cell re-render: cell value factories snapshot model values, so
+        // in-place edits to the same object references would otherwise show stale text.
+        t.refresh();
     }
 
     // ---------------------------------------------------------------- widgets
