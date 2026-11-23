@@ -29,11 +29,11 @@ public class HarvestStockView extends View {
         header("4 - Harvest Stock Recording", "");
         UI.Form f = new UI.Form();
         f.add("Batch ID", batchSelect);
-        harvestedQty = f.text("Harvested Qty (kg)");
-        rejectedQty = f.text("Rejected Qty (kg)");
+        harvestedQty = f.text("Harvested Qty (kg)", "500");
+        rejectedQty = f.text("Rejected Qty (kg)", "50");
         grade = f.combo("Grade", GRADES);
         ripeness = f.combo("Ripeness", RIPENESS);
-        rejectReason = f.text("Reject Reason");
+        rejectReason = f.text("Reject Reason", "Moldy grains");
         f.wide(UI.btn("Record Stock", "primary", this::recordStock));
 
         UI.col(recordTable, "Batch ID", r -> r.batchId);
