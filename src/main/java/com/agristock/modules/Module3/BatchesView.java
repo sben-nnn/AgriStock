@@ -32,7 +32,7 @@ public class BatchesView extends View {
     private TextField cropName;
     private ComboBox<String> cropCategory;
     private ComboBox<String> cropVariety; // variety chosen from a selection
-    private TextField batchPlot, batchWorker, batchQty;
+    private TextField batchWorker, batchQty;
     private ComboBox<String> batchUnit;
     private DatePicker batchHarvest, batchExpiry;
     private Label nextFarmId, nextBatchId;
@@ -95,7 +95,6 @@ public class BatchesView extends View {
         UI.Form f3 = new UI.Form();
         f3.wide(nextBatchId = new Label());
         f3.add("Farm ID", farmSelect);
-        batchPlot = f3.text("Plot");
         f3.add("Crop", cropSelect);
         batchWorker = f3.text("Worker");
         batchHarvest = f3.date("Harvest Date", LocalDate.now());
@@ -166,11 +165,11 @@ public class BatchesView extends View {
         String crop = sep < 0 ? sel : sel.substring(0, sep);
         String variety = sep < 0 ? "" : sel.substring(sep + 3);
         sys.createHarvestBatch(
-                sys.nextBatchId(), fid, batchPlot.getText(), crop, variety,
+                sys.nextBatchId(), fid, "", crop, variety,
                 batchWorker.getText(), "",
                 harvest, expiry,
                 UI.num(batchQty, "Qty"), unit);
-        batchPlot.clear(); batchWorker.clear(); batchQty.clear();
+        batchWorker.clear(); batchQty.clear();
         batchHarvest.setValue(LocalDate.now());
         batchExpiry.setValue(LocalDate.now().plusDays(7));
         refresh();
