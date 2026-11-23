@@ -29,7 +29,7 @@ public class ReportsView extends View {
         svc = new ReportsService(sys);
         header("13 - Reports & Analytics", "Finds the start and end of the chosen date range.");
         type.getItems().addAll(Arrays.asList("Harvest", "Inventory", "Sales", "Dispatch", "Loss")); type.setValue("Harvest");
-        batch.setPromptText("Batch ID"); batch.setPrefWidth(110);
+        batch.setPromptText("e.g. B-1001"); batch.setPrefWidth(110);
         from.setPromptText("From"); to.setPromptText("To"); from.setPrefWidth(120); to.setPrefWidth(120);
 
         FlowPane filters = new FlowPane(8, 8, new Label("Report"), type, new Label("Crop"), crop, new Label("Farm"), farm,
