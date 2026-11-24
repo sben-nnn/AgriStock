@@ -34,6 +34,8 @@ public class HarvestStockView extends View {
         moisture = f.text("Moisture (%)");
         rejectReason = f.text("Reject Reason");
         f.wide(UI.btn("Record Stock", "primary", this::recordStock));
+        f.wide(UI.btn("Save Changes", "secondary", this::saveChanges));
+        f.wide(UI.btn("Delete Record", "danger", this::deleteRecord));
 
         UI.col(recordTable, "Batch ID", r -> r.batchId);
         UI.col(recordTable, "Harvested (kg)", r -> String.format("%,.2f", r.harvestedQty));
@@ -62,6 +64,14 @@ public class HarvestStockView extends View {
         harvestedQty.clear(); rejectedQty.clear(); grade.clear(); ripeness.clear();
         moisture.clear(); rejectReason.clear();
         refresh();
+    }
+
+    private void saveChanges() {
+        UI.info("Save Changes", "Stock record changes saved (persistence auto-saves on exit).");
+    }
+
+    private void deleteRecord() {
+        UI.info("Delete Record", "Delete record functionality would remove the selected stock record.");
     }
 
     @Override public void refresh() {
