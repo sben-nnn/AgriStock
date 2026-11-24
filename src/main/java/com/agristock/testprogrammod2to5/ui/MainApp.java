@@ -105,6 +105,23 @@ public class MainApp extends Application {
         top.getStyleClass().add("topbar"); top.setAlignment(Pos.CENTER_RIGHT);
         if (sys.checkPermission(Feature.PERSISTENCE)) top.getChildren().add(UI.btn("\uD83D\uDCBE Save data", "secondary", this::save));
         if (sys.session.role == Role.OWNER) top.getChildren().add(UI.btn("Load sample data", "ghost", this::loadSample));
+        top.getChildren().add(UI.btn("Reset data", "danger", this::resetData));
+        Label roleLabel = new Label("Signed in as:"); roleLabel.getStyleClass().add("user-chip");
+        ComboBox<String> roleSelect = new ComboBox<>(FXCollections.observableArrayList("Farm Owner", "Farm Manager", "Inventory Staff", "Sales / Dispatch"));
+        roleSelect.setValue(sys.session.role.label);
+        roleSelect.setOnAction(e -> {
+            String sel = roleSelect.getValue();
+            Role newRole = switch (sel) {
+                case "Farm Owner" -> Role.OWNER;
+                case "Farm Manager" -> Role.MANAGER;
+                case "Inventory Staff" -> Role.INVENTORY;
+                default -> Role.SALES;
+            };
+            sys.session.role = newRole;
+            chip.setText(sys.session.fullName + "  \u2022  " + sys.session.role.label);
+            refreshCurrent();
+        });
+        top.getChildren().addAll(roleLabel, roleSelect);
         top.getChildren().add(UI.btn("Log out", "danger", this::logout));
 
         BorderPane root = new BorderPane(sp);
@@ -125,6 +142,32 @@ public class MainApp extends Application {
         SampleData.load(sys);
         refreshCurrent();
         UI.info("Sample data", "Demo data loaded. Browse the modules to explore it.");
+    }
+
+    private void resetData() {
+        if (!UI.confirm("Reset all data? This will clear farmers, batches, stock, sales, and audit records.")) return;
+        sys.users.clear();
+        sys.farmers.clear();
+        sys.farms.clear();
+        sys.crops.clear();
+        sys.batches.clear();
+        sys.stockRecords.clear();
+        sys.inspectionQueue.clear();
+        sys.rotationQueue.clear();
+        sys.stock.clear();
+        sys.expiryHeap.clear();
+        sys.pendingSales.clear();
+        sys.sales.clear();
+        sys.deliveryQueue.clear();
+        sys.deliveries.clear();
+        sys.spoilage.clear();
+        sys.yields.clear();
+        sys.audit.clear();
+        sys.saleCounter = 0; sys.deliveryCounter = 0; sys.spoilageCounter = 0;
+        sys.seedDefaultUsers();
+        sys.session = null;
+        UI.info("Data reset", "All data has been cleared. Default users restored.");
+        refreshCurrent();
     }
 
     private void logout() {
