@@ -468,7 +468,7 @@ public class AgriStockSystem {
         s.harvested = r.harvestedQty; s.damaged = r.rejectedQty; s.remaining = r.saleableQty; s.unitValue = unitValue;
         if (!stock.insert(s.itemId, s))
             throw new AgriException("Stock item '" + s.itemId + "' already exists.");
-        if (s.remaining > 0) expiryHeap.insert(s);
+        if (s.totalStock() > 0) expiryHeap.insert(s);
     }
 
     // MODULE 6: Storage & Location Management (Array + FIFO Queue rotation)
@@ -478,13 +478,14 @@ public class AgriStockSystem {
         StockItem s = stock.search(itemId == null ? "" : itemId);
         if (s == null) throw new AgriException("Select a batch that has passed inspection.");
         if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
-        if (qty > Math.max(0, s.remaining - s.stored) + 0.0001) throw new AgriException("Only "
-                + String.format("%.2f", Math.max(0, s.remaining - s.stored)) + " kg of this batch is not yet stored.");
+        if (qty > s.remaining + 0.0001) throw new AgriException("Only "
+                + String.format("%.2f", s.remaining) + " kg of this batch is not yet stored.");
         if (date == null) throw new AgriException("Storage date is required.");
         StorageEntry e = new StorageEntry();
         e.batchId = itemId; e.location = locations[locationIndex]; e.qty = qty; e.storageDate = date;
         e.conditions = conditions == null ? "" : conditions.trim();
         rotationQueue.enqueue(e);                                      // FIFO rotation order
+        s.remaining -= qty;                                            // storing reduces the unstored pool
         s.stored += qty;
         s.location = s.location.equals("Unassigned") || s.location.equals(e.location) ? e.location : "Multiple";
         logAuditTrail("TRANSFER", itemId, qty, 0, "Stored at " + e.location);
@@ -504,16 +505,15 @@ public class AgriStockSystem {
         if (qty <= 0) throw new AgriException("Quantity must be greater than zero.");
         if (date == null) throw new AgriException("Storage date is required.");
         StockItem s = stock.search(e.batchId == null ? "" : e.batchId);
-        double otherStored = 0;
-        for (StorageEntry x : rotationQueue)
-            if (x != e && x.batchId.equals(e.batchId)) otherStored += x.qty;
-        if (s != null && qty > Math.max(0, s.remaining - otherStored) + 0.0001)
-            throw new AgriException("Only " + String.format("%.2f", Math.max(0, s.remaining - otherStored))
-                    + " kg of this batch is not stored elsewhere.");
+        // This entry's qty is currently in storage; releasing it back makes it available to re-store.
+        if (s != null && qty > s.remaining + e.qty + 0.0001)
+            throw new AgriException("Only " + String.format("%.2f", s.remaining + e.qty)
+                    + " kg of this batch is available to store.");
         double delta = qty - e.qty;
         e.location = locations[locationIndex]; e.qty = qty; e.storageDate = date;
         e.conditions = conditions == null ? "" : conditions.trim();
         if (s != null) {
+            s.remaining -= delta;
             s.stored += delta;
             s.location = "Multiple";
             rebuildStockLocation(s);
@@ -528,6 +528,7 @@ public class AgriStockSystem {
         if (s != null) {
             s.stored -= e.qty;
             if (s.stored < 0) s.stored = 0;
+            s.remaining += e.qty;                                     // return it to the unstored pool
             rebuildStockLocation(s);
         }
         logAuditTrail("ADJUSTMENT", e.batchId, e.qty, 0, "Storage entry deleted");
@@ -581,12 +582,19 @@ public class AgriStockSystem {
         logAuditTrail("ADJUSTMENT", itemId, s.remaining, 0, "Item details edited");
     }
 
+    /** Consume stock from the unstored pool first, then from stored stock. */
+    private void consumeStock(StockItem s, double qty) {
+        double fromUnstored = Math.min(Math.max(0, s.remaining), qty);
+        s.remaining -= fromUnstored;
+        s.stored = Math.max(0, s.stored - (qty - fromUnstored));
+    }
+
     // ---- MODULE 7: delete stock item ----
     public void deleteItem(String itemId) {
         require(Feature.STOCK_EDIT);
         StockItem s = mustFindStock(itemId);
-        if (s.remaining > 0.0001)
-            throw new AgriException("Cannot delete item: " + String.format("%.2f", s.remaining)
+        if (s.totalStock() > 0.0001)
+            throw new AgriException("Cannot delete item: " + String.format("%.2f", s.totalStock())
                     + " kg still remains in stock.");
         if (s.reserved > 0.0001) throw new AgriException("Cannot delete item: it has reserved stock.");
         for (Sale sale : sales) if (sale.itemId.equals(itemId))
@@ -625,11 +633,11 @@ public class AgriStockSystem {
     }
 
     public double computeAvailableStock(StockItem s) { return s.available(); }
-    public boolean flagLowStock(StockItem s) { return s.remaining > 0 && s.available() <= lowStockKg; }
-    public boolean flagAgingStock(StockItem s) { return s.remaining > 0 && s.harvestDate.plusDays(agingDays).isBefore(today()); }
-    public boolean flagExpired(StockItem s) { return s.remaining > 0 && s.expiryDate.isBefore(today()); }
+    public boolean flagLowStock(StockItem s) { return s.totalStock() > 0 && s.available() <= lowStockKg; }
+    public boolean flagAgingStock(StockItem s) { return s.totalStock() > 0 && s.harvestDate.plusDays(agingDays).isBefore(today()); }
+    public boolean flagExpired(StockItem s) { return s.totalStock() > 0 && s.expiryDate.isBefore(today()); }
     public boolean flagNearExpiry(StockItem s) {
-        return s.remaining > 0 && !flagExpired(s) && !s.expiryDate.isAfter(today().plusDays(nearExpiryDays));
+        return s.totalStock() > 0 && !flagExpired(s) && !s.expiryDate.isAfter(today().plusDays(nearExpiryDays));
     }
 
     public String flagsOf(StockItem s) {
@@ -669,7 +677,7 @@ public class AgriStockSystem {
     // MODULE 8: Expiry & Purge (Min-Heap, FEFO / extract-min)
     public void rebuildExpiryHeap() {
         expiryHeap.clear();
-        stock.inOrder(s -> { if (s.remaining > 0) expiryHeap.insert(s); });
+        stock.inOrder(s -> { if (s.totalStock() > 0) expiryHeap.insert(s); });
     }
 
     public List<Spoilage> checkAndPurgeExpired() {
@@ -677,12 +685,12 @@ public class AgriStockSystem {
         List<Spoilage> purged = new ArrayList<>();
         while (!expiryHeap.isEmpty()) {
             StockItem root = expiryHeap.peek();
-            if (root.remaining <= 0) { expiryHeap.extractMin(); continue; }
+            if (root.totalStock() <= 0) { expiryHeap.extractMin(); continue; }
             if (!root.expiryDate.isBefore(today())) break;             // earliest is still fresh -> all fresh
             expiryHeap.extractMin();
-            double lost = root.remaining;
+            double lost = root.totalStock();
             cancelPendingSalesFor(root.itemId);
-            root.damaged += lost; root.remaining = 0; root.reserved = 0;
+            root.damaged += lost; root.remaining = 0; root.stored = 0; root.reserved = 0;
             Spoilage sp = newSpoilage(root.itemId, lost, "Expired - purged by FEFO check", "SYSTEM");
             sp.kind = "Expired purge"; sp.status = "APPROVED"; sp.approver = session.username; sp.lossValue = lost * root.unitValue;
             logAuditTrail("ADJUSTMENT", root.itemId, lost, 0, "Expired stock purged");
@@ -714,17 +722,17 @@ public class AgriStockSystem {
         double need = qty;
         while (need > 0.0001 && !expiryHeap.isEmpty()) {
             StockItem root = expiryHeap.peek();
-            boolean skip = root.remaining <= 0 || flagExpired(root) || root.available() <= 0 || !(any || root.crop.equalsIgnoreCase(cropFilter));
+            boolean skip = root.totalStock() <= 0 || flagExpired(root) || root.available() <= 0 || !(any || root.crop.equalsIgnoreCase(cropFilter));
             if (skip) {
                 StockItem x = expiryHeap.extractMin();
-                if (x.remaining > 0) held.add(x);                       // keep it, re-insert afterwards
+                if (x.totalStock() > 0) held.add(x);                    // keep it, re-insert afterwards
                 continue;
             }
             double take = Math.min(need, root.available());
-            root.remaining -= take; root.dispatched += take; need -= take;
+            consumeStock(root, take); root.dispatched += take; need -= take;
             log.add(String.format("%s (%s) - %.2f kg, expires %s", root.itemId, root.crop, take, root.expiryDate));
             logAuditTrail("DISPATCH", root.itemId, take, 0, "FEFO dispatch");
-            if (root.remaining <= 0) expiryHeap.extractMin();
+            if (root.totalStock() <= 0) expiryHeap.extractMin();
         }
         for (StockItem h : held) expiryHeap.insert(h);
         return log;
@@ -760,10 +768,10 @@ public class AgriStockSystem {
         StockItem s = mustFindStock(sale.itemId);
         if (s.expiryDate.isBefore(today()))
             throw new AgriException("Order " + sale.ref + " cannot be confirmed: batch " + s.itemId + " has expired. Cancel the order.");
-        if (sale.qty > s.remaining + 0.0001) throw new AgriException("Order " + sale.ref + " cannot be confirmed: stock level changed.");
+        if (sale.qty > s.totalStock() + 0.0001) throw new AgriException("Order " + sale.ref + " cannot be confirmed: stock level changed.");
         pendingSales.dequeue();
         s.reserved = Math.max(0, s.reserved - sale.qty);
-        s.remaining -= sale.qty; s.sold += sale.qty;
+        consumeStock(s, sale.qty); s.sold += sale.qty;
         sale.status = "CONFIRMED";
         logAuditTrail("SALE", sale.ref, sale.qty, 0, "Sale confirmed - stock reduced");
         return sale;
@@ -878,7 +886,7 @@ public class AgriStockSystem {
         if (!sp.status.equals("PENDING")) throw new AgriException("Only pending requests can be approved.");
         StockItem s = mustFindStock(sp.itemId);
         validateStockMovement(s, sp.qty, "SPOILAGE");
-        s.remaining -= sp.qty; s.damaged += sp.qty;
+        consumeStock(s, sp.qty); s.damaged += sp.qty;
         logFinancialLoss(sp, s);
         sp.status = "APPROVED"; sp.approver = session.username;
         logAuditTrail("ADJUSTMENT", sp.id, sp.qty, 0, "Adjustment approved by " + session.username);
@@ -927,7 +935,7 @@ public class AgriStockSystem {
         require(Feature.AUDIT_VIEW);
         StockItem s = mustFindStock(itemId);
         if (physical < 0) throw new AgriException("Physical count cannot be negative.");
-        return physical - s.remaining;
+        return physical - s.totalStock();
     }
 
     public void recordDifference(String itemId, double physical, String note) {
@@ -943,8 +951,10 @@ public class AgriStockSystem {
         StockItem s = mustFindStock(itemId);
         double diff = compareCounts(itemId, physical);
         if (physical < s.reserved - 0.0001) throw new AgriException("Physical count is lower than the reserved quantity (" + s.reserved + " kg). Resolve pending sales first.");
-        double recorded = s.remaining;
-        s.remaining = physical;
+        double recorded = s.totalStock();
+        // Physical count is total stock on hand; preserve stored amounts where possible.
+        s.stored = Math.min(s.stored, physical);
+        s.remaining = Math.max(0, physical - s.stored);
         rebuildExpiryHeap();
         logAuditTrail("AUDIT_RECONCILE", itemId, recorded, physical, note.isBlank() ? "Count reconciled" : note.trim());
     }

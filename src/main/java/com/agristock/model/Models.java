@@ -98,7 +98,10 @@ public final class Models {
         public String itemId, crop, category, grade = "", location = "Unassigned";
         public LocalDate harvestDate, expiryDate;
         public double harvested, stored, reserved, sold, dispatched, damaged, remaining, unitValue;
-        public double available() { return remaining - reserved; }
+        /** Total physical stock on hand (unstored + stored). */
+        public double totalStock() { return remaining + stored; }
+        /** Stock available to promise: everything on hand minus what is reserved for sales. */
+        public double available() { return totalStock() - reserved; }
     }
 
     public static class Sale {
