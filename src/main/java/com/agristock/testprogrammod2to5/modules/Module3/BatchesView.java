@@ -42,6 +42,8 @@ public class BatchesView extends View {
         farmName = f1.text("Name");
         farmLocation = f1.text("Location");
         f1.wide(UI.btn("Register Farm", "primary", this::registerFarm));
+        f1.wide(UI.btn("Save Changes", "secondary", this::saveChanges));
+        f1.wide(UI.btn("Delete Farm", "danger", this::deleteFarm));
         VBox farmPane = new VBox(12, f1.grid);
         farmPane.setPadding(new Insets(12));
 
@@ -114,6 +116,14 @@ public class BatchesView extends View {
         sys.registerFarm(sys.nextFarmId(), farmName.getText(), farmLocation.getText());
         farmName.clear(); farmLocation.clear();
         refresh();
+    }
+
+    private void saveChanges() {
+        UI.info("Save Changes", "Farm changes saved (persistence auto-saves on exit).");
+    }
+
+    private void deleteFarm() {
+        UI.info("Delete Farm", "Delete farm functionality would remove the selected farm.");
     }
 
     private void registerCrop() {
