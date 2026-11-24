@@ -41,17 +41,17 @@ public final class TestData6to10 {
 
         // ---- stock items (balances already include the confirmed sales below)
         addStock(sys, "B-1001", "Rice", "Grain", "Dry Warehouse 1", t.minusDays(30), t.plusDays(150),
-                1000, 50, 200, 700, 100, 750, 60);
+                1000, 50, 200, 700, 100, 50, 60);
         addStock(sys, "B-1002", "Tomato", "Vegetable", "Cold Room A", t.minusDays(6), t.plusDays(4),
-                300, 15, 100, 185, 0, 185, 55);
+                300, 15, 100, 185, 0, 0, 55);
         addStock(sys, "B-1003", "Mango", "Fruit", "Unassigned", t.minusDays(8), t.plusDays(9),
                 250, 0, 50, 0, 0, 200, 70);
         addStock(sys, "B-1004", "Corn", "Grain", "Grain Silo 1", t.minusDays(15), t.plusDays(100),
-                1500, 30, 0, 1470, 300, 1470, 22);
+                1500, 30, 0, 1470, 300, 0, 22);
         addStock(sys, "B-1005", "Eggplant", "Vegetable", "Unassigned", t.minusDays(20), t.minusDays(2),
                 120, 0, 0, 0, 30, 120, 40);
         addStock(sys, "B-1006", "Banana", "Fruit", "Cold Room B", t.minusDays(3), t.plusDays(8),
-                70, 0, 20, 50, 0, 50, 35);
+                70, 0, 20, 50, 0, 0, 35);
 
         // ---- storage FIFO rotation queue (oldest lot first)
         sys.rotationQueue.enqueue(storage("B-1001", "Dry Warehouse 1", 700, t.minusDays(29), "22\u00B0C, 60% RH"));
@@ -97,7 +97,7 @@ public final class TestData6to10 {
         s.harvested = harvested; s.damaged = damaged; s.sold = sold; s.stored = stored;
         s.reserved = reserved; s.remaining = remaining; s.unitValue = unitValue;
         sys.stock.insert(id, s);
-        if (s.remaining > 0) sys.expiryHeap.insert(s);
+        if (s.totalStock() > 0) sys.expiryHeap.insert(s);
     }
 
     private static StorageEntry storage(String batchId, String location, double qty, LocalDate date, String conditions) {

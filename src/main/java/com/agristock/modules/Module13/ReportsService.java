@@ -50,7 +50,7 @@ public class ReportsService {
                 });
                 break;
             case "Inventory":
-                sys.stock.inOrder(s -> a.add(new ReportEntry("INVENTORY", s.itemId, s.crop, farmName(s.itemId), s.harvestDate, s.remaining, s.remaining * s.unitValue)));
+                sys.stock.inOrder(s -> a.add(new ReportEntry("INVENTORY", s.itemId, s.crop, farmName(s.itemId), s.harvestDate, s.totalStock(), s.totalStock() * s.unitValue)));
                 break;
             case "Sales":
                 for (Sale s : sys.sales) if (s.status.equals("CONFIRMED")) a.add(new ReportEntry("SALE", s.itemId, s.crop, farmName(s.itemId), s.date, s.qty, s.total()));
@@ -127,7 +127,7 @@ public class ReportsService {
 
     public String identifySlowMoving() {
         DynamicArray<StockItem> items = new DynamicArray<>();
-        for (StockItem s : sys.traverseInventory()) if (s.remaining > 0) items.add(s);
+        for (StockItem s : sys.traverseInventory()) if (s.totalStock() > 0) items.add(s);
         Sorts.mergeSort(items, (a, b) -> {
             double ta = a.harvested == 0 ? 0 : a.sold / a.harvested, tb = b.harvested == 0 ? 0 : b.sold / b.harvested;
             int c = Double.compare(ta, tb);
@@ -138,7 +138,7 @@ public class ReportsService {
         for (StockItem s : items) {
             long age = java.time.temporal.ChronoUnit.DAYS.between(s.harvestDate, sys.today());
             sb.append(String.format("%d. %-8s %-10s sold %.0f%% | %,.1f kg left | %d days in stock%n", rank++, s.itemId, s.crop,
-                    s.harvested == 0 ? 0 : 100 * s.sold / s.harvested, s.remaining, age));
+                    s.harvested == 0 ? 0 : 100 * s.sold / s.harvested, s.totalStock(), age));
         }
         if (items.isEmpty()) sb.append("No stock on hand.\n");
         return sb.toString();

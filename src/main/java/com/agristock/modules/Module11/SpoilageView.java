@@ -77,7 +77,7 @@ public class SpoilageView extends View {
     @Override public void refresh() {
         UI.fill(table, svc.findByBatch(search.getText()));
         List<String> l = new ArrayList<>();
-        for (StockItem s : sys.traverseInventory()) if (s.remaining > 0) l.add(s.itemId + " | " + s.crop + " (" + Fmt.kg(s.available()) + " kg available)");
+        for (StockItem s : sys.traverseInventory()) if (s.totalStock() > 0) l.add(s.itemId + " | " + s.crop + " (" + Fmt.kg(s.available()) + " kg available)");
         UI.setItems(item, l);
         double q = 0, v = 0;
         for (Spoilage s : sys.spoilage) if (s.status.equals("APPROVED")) { q += s.qty; v += s.lossValue; }

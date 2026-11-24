@@ -32,9 +32,9 @@ public class DashboardView extends View {
         int expired = 0, nearExpiry = 0, low = 0, aging = 0;
         List<StockItem> attention = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) {
-            if (s.remaining > 0) {
-                totalKg += s.remaining;
-                totalValue += s.remaining * s.unitValue;
+            if (s.totalStock() > 0) {
+                totalKg += s.totalStock();
+                totalValue += s.totalStock() * s.unitValue;
             }
             if (sys.flagExpired(s)) expired++;
             if (sys.flagNearExpiry(s)) nearExpiry++;

@@ -123,6 +123,6 @@ public final class TestData2to5 {
         s.harvestDate = b.harvestDate; s.expiryDate = b.expiryDate;
         s.harvested = r.harvestedQty; s.damaged = r.rejectedQty; s.remaining = r.saleableQty; s.unitValue = unitValue;
         sys.stock.insert(s.itemId, s);
-        if (s.remaining > 0) sys.expiryHeap.insert(s);
+        if (s.totalStock() > 0) sys.expiryHeap.insert(s);
     }
 }

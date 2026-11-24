@@ -60,7 +60,7 @@ public class ExpiryView extends View {
         UI.col(expiryTable, "Expiry", s -> s.expiryDate == null ? "-" : s.expiryDate.toString());
         UI.col(expiryTable, "Remaining (kg)", s -> String.format("%,.2f", s.remaining));
         UI.col(expiryTable, "Status", s -> {
-            if (s.remaining <= 0) return "Empty";
+            if (s.totalStock() <= 0) return "Empty";
             if (sys.flagExpired(s)) return "EXPIRED";
             if (sys.flagNearExpiry(s)) return "Near-expiry";
             return "Fresh";
@@ -130,7 +130,7 @@ public class ExpiryView extends View {
 
         List<StockItem> byExpiry = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) {
-            if (s.remaining > 0) byExpiry.add(s);
+            if (s.totalStock() > 0) byExpiry.add(s);
         }
         byExpiry.sort(Comparator.comparing(
                 s -> s.expiryDate == null ? LocalDate.MAX : s.expiryDate));
@@ -138,7 +138,7 @@ public class ExpiryView extends View {
 
         List<StockItem> expired = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) {
-            if (s.remaining > 0 && sys.flagExpired(s)) expired.add(s);
+            if (s.totalStock() > 0 && sys.flagExpired(s)) expired.add(s);
         }
         UI.fill(expiredTable, expired);
     }

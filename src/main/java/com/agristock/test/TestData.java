@@ -44,9 +44,9 @@ public final class TestData {
 
         // ---- stock items (balances are AFTER the sales and the spoilage entries below)
         addStock(sys, "B-1001", "Rice", "Grain", "Cold Room A", harvest1, LocalDate.of(2035, 12, 31),
-                1000, 50, 200, 900, 750, 60);
+                1000, 50, 200, 700, 50, 60);
         addStock(sys, "B-1002", "Tomato", "Vegetable", "Cold Room B", harvest2, LocalDate.of(2034, 12, 31),
-                300, 12, 80, 285, 208, 90);
+                300, 12, 80, 100, 108, 90);
         addStock(sys, "M-2001", "Corn", "Grain", "Unassigned", today, LocalDate.of(2035, 1, 1),
                 100, 0, 0, 0, 100, 25);
 
@@ -114,7 +114,7 @@ public final class TestData {
         s.harvested = harvested; s.damaged = damaged; s.sold = sold; s.stored = stored;
         s.remaining = remaining; s.unitValue = unitValue;
         sys.stock.insert(id, s);
-        if (s.remaining > 0) sys.expiryHeap.insert(s);
+        if (s.totalStock() > 0) sys.expiryHeap.insert(s);
     }
 
     private static Sale sale(String ref, String buyer, String itemId, String crop, double qty, double price, LocalDate date) {

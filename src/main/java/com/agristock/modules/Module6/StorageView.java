@@ -155,7 +155,7 @@ public class StorageView extends View {
         // Batches that still have stock left to store.
         List<String> ids = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) {
-            if (s.remaining - s.stored > 0.0001) ids.add(s.itemId);
+            if (s.remaining > 0.0001) ids.add(s.itemId);
         }
         if (editingEntry != null && !ids.contains(editingEntry.batchId)) ids.add(editingEntry.batchId);
         UI.setItems(batchSelect, ids);

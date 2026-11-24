@@ -137,7 +137,7 @@ public class SalesView extends View {
     @Override public void refresh() {
         List<String> ids = new ArrayList<>();
         for (StockItem s : sys.traverseInventory()) {
-            if (s.remaining > 0.0001 && s.available() > 0.0001 && !s.expiryDate.isBefore(sys.today())) {
+            if (s.totalStock() > 0.0001 && s.available() > 0.0001 && !s.expiryDate.isBefore(sys.today())) {
                 ids.add(s.itemId + " | " + s.crop + " (" + Fmt.kg(s.available()) + " available)");
             }
         }

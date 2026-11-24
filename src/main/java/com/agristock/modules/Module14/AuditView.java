@@ -60,7 +60,7 @@ public class AuditView extends View {
     @Override public void refresh() {
         UI.fill(table, svc.auditHistory(filter.getText()));
         List<String> l = new ArrayList<>();
-        for (StockItem s : sys.traverseInventory()) l.add(s.itemId + " | " + s.crop + " (recorded " + Fmt.kg(s.remaining) + " kg)");
+        for (StockItem s : sys.traverseInventory()) l.add(s.itemId + " | " + s.crop + " (recorded " + Fmt.kg(s.totalStock()) + " kg)");
         UI.setItems(item, l);
     }
 }
