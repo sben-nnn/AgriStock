@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** MODULE 15: System state persistence - sequential read/write of one CSV file. */
+
 public class Persistence {
     public static final Path FILE = Paths.get("data", "agristock_state.csv");
 
@@ -37,6 +37,10 @@ public class Persistence {
         String[] raw = line.split(",", -1);
         for (int i = 0; i < raw.length; i++) raw[i] = u(raw[i]);
         return raw;
+    }
+
+    private static String col(String[] t, int idx) {
+        return idx < t.length ? t[idx] : "";
     }
 
     private static LocalDate d(String s) { return s.isEmpty() ? null : LocalDate.parse(s); }
@@ -108,7 +112,12 @@ public class Persistence {
                 if (ln.isBlank()) continue;
                 String[] t = split(ln);
                 switch (t[0]) {
-                    case "COUNTER": s.saleCounter = (int) n(t[1]); s.deliveryCounter = (int) n(t[2]); s.spoilageCounter = (int) n(t[3]); s.itemCounter = (int) n(t[4]); break;
+                    case "COUNTER":
+                        s.saleCounter = (int) n(col(t, 1));
+                        s.deliveryCounter = (int) n(col(t, 2));
+                        s.spoilageCounter = (int) n(col(t, 3));
+                        s.itemCounter = (int) n(col(t, 4));
+                        break;
                     case "SETTING": s.lowStockKg = n(t[1]); s.agingDays = (int) n(t[2]); s.nearExpiryDays = (int) n(t[3]); break;
                     case "USER": { User x = new User(t[1], t[2], t[3], Role.valueOf(t[4])); x.active = Boolean.parseBoolean(t[5]); s.users.insert(x.username, x); break; }
                     case "FARM": s.farms.addFirst(new Farm(t[1], t[2], t[3], n(t[4]))); break;
