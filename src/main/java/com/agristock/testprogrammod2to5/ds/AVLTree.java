@@ -120,4 +120,10 @@ public class AVLTree<K extends Comparable<K>, V> {
         y.height = 1 + Math.max(h(y.left), h(y.right));
         return y;
     }
+
+    /** Remove all entries from the tree. */
+    public void clear() {
+        root = null;
+        size = 0;
+    }
 }
