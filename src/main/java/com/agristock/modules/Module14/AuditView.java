@@ -23,7 +23,7 @@ public class AuditView extends View {
     public AuditView(Ctx ctx) {
         super(ctx);
         svc = new AuditService(sys);
-        header("14 - Inventory Audit & Validation", "Physical counts are compared with recorded counts. Every transaction is appended to an immutable audit trail; invalid movements are rejected and logged.");
+        header("14 - Inventory Audit & Validation", "Append-only Singly Linked List audit trail + linear search; physical count compared with recorded stock.");
         UI.Form f = new UI.Form();
         f.add("Batch", item);
         physical = f.text("Physical count (kg)", "e.g. 980");

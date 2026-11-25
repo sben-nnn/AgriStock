@@ -25,7 +25,7 @@ public class SpoilageView extends View {
     public SpoilageView(Ctx ctx) {
         super(ctx);
         svc = new SpoilageService(sys);
-        header("11 - Spoilage, Loss & Adjustments", "Losses are appended to a linked list and never overwritten. An authorised user (owner/manager) must approve an adjustment before stock changes.");
+        header("11 - Spoilage, Loss & Adjustments", "Append-only Singly Linked List - losses are never overwritten; linear search by batch ID. Owner/manager approval required.");
         UI.Form f = new UI.Form();
         f.add("Batch", item);
         qty = f.text("Quantity (kg)", "e.g. 10");

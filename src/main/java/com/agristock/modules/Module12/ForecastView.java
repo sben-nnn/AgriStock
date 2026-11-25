@@ -27,7 +27,7 @@ public class ForecastView extends View {
     public ForecastView(Ctx ctx) {
         super(ctx);
         svc = new ForecastService(sys);
-        header("12 - Forecasting", "A moving average over the latest seasons smooths variance and projects seed requirements.");
+        header("12 - Forecasting", "Dynamic Array of yield records + Moving Average over the latest N seasons to project seed requirements.");
         crop.setEditable(true);
         UI.Form h = new UI.Form();
         h.add("Crop", crop);

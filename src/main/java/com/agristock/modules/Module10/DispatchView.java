@@ -31,7 +31,7 @@ public class DispatchView extends View {
 
     private void build() {
         header("10 - Dispatch & Delivery Monitoring",
-                "Schedule deliveries by earliest deadline (EDF) and track dispatch and receipt.");
+                "Heap-backed Priority Queue using Earliest Deadline First (EDF), tie-broken by urgency.");
 
         // ---------- Left panel: schedule delivery ----------
         UI.Form schedF = new UI.Form();

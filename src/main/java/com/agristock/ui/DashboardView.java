@@ -26,7 +26,7 @@ public class DashboardView extends View {
         getChildren().clear();
 
         String who = sys.session == null ? "" : "Welcome, " + sys.session.fullName + "  \u2022  ";
-        header("Dashboard", who + sys.today());
+        header("Dashboard", who + sys.today() + "   |   AVL Tree in-order traversal for inventory; Min-Heap + Priority Queue for deliveries");
 
         double totalKg = 0, totalValue = 0;
         int expired = 0, nearExpiry = 0, low = 0, aging = 0;
