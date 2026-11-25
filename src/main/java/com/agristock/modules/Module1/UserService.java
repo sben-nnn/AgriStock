@@ -1,37 +1,41 @@
 package com.agristock.modules.Module1;
 
-import com.agristock.model.Models.User;
 import com.agristock.ds.DynamicArray;
+import com.agristock.model.Models.Role;
+import com.agristock.model.Models.User;
+import com.agristock.service.AgriStockSystem;
 
-// Service for managing users
+// Service for managing users. Delegates to the shared system data structures (AVL tree).
 public class UserService {
-    private DynamicArray<User> users = new DynamicArray<>();
+    private final AgriStockSystem sys;
 
-    // Add a user
-    public void add(User user) {
-        users.add(user);
+    public UserService(AgriStockSystem sys) { this.sys = sys; }
+
+    public void add(String username, String fullName, String password, Role role) {
+        sys.addUser(username, fullName, password, role);
     }
 
-    // Get all users
-    public DynamicArray<User> getAll() {
-        return users;
+    public void edit(String username, String fullName, String password) {
+        sys.editUser(username, fullName, password);
     }
 
-    // Find user by username
-    public User findByUsername(String username) {
-        for (int i = 0; i < users.size(); i++) {
-            if (users.get(i).username.equalsIgnoreCase(username)) {
-                return users.get(i);
-            }
-        }
-        return null;
+    public void assign(String username, Role role) {
+        sys.assignRole(username, role);
     }
 
-    // Deactivate a user
     public void setActive(String username, boolean active) {
-        User u = findByUsername(username);
-        if (u != null) {
-            u.active = active;
-        }
+        sys.setUserActive(username, active);
+    }
+
+    public void delete(String username) {
+        sys.deleteUser(username);
+    }
+
+    public DynamicArray<User> getAll() {
+        return sys.users.toSortedArray();
+    }
+
+    public User findByUsername(String username) {
+        return sys.users.search(username == null ? "" : username);
     }
 }

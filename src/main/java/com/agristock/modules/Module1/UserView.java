@@ -12,11 +12,12 @@ import javafx.scene.control.*;
 // User & Role Management
 public class UserView extends View {
     private final TableView<User> table = UI.table();
+    private final UserService svc;
     private TextField username, fullName;
     private PasswordField password;
     private final ComboBox<Role> role = new ComboBox<>();
 
-    public UserView(Ctx ctx) { super(ctx); build(); }
+    public UserView(Ctx ctx) { super(ctx); svc = new UserService(sys); build(); }
 
     private void build() {
         header("1 - User & Role Management", "");
@@ -46,33 +47,33 @@ public class UserView extends View {
     @Override public Feature feature() { return Feature.USERS; }
 
     private void add() {
-        sys.addUser(username.getText(), fullName.getText(), password.getText(), role.getValue());
+        svc.add(username.getText(), fullName.getText(), password.getText(), role.getValue());
         password.clear(); refreshAll();
     }
     private void edit() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
-        sys.editUser(u.username, fullName.getText(), password.getText());
+        svc.edit(u.username, fullName.getText(), password.getText());
         password.clear(); refreshAll();
     }
     private void assign() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
-        sys.assignRole(u.username, role.getValue()); refreshAll();
+        svc.assign(u.username, role.getValue()); refreshAll();
     }
     private void toggle() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
-        sys.setUserActive(u.username, !u.active); refreshAll();
+        svc.setActive(u.username, !u.active); refreshAll();
     }
     private void delete() {
         User u = table.getSelectionModel().getSelectedItem();
         if (u == null) throw new AgriException("Select a user first.");
         if (!UI.confirm("Delete user '" + u.username + "'?")) return;
-        sys.deleteUser(u.username); refreshAll();
+        svc.delete(u.username); refreshAll();
     }
 
     @Override public void refresh() {
-        UI.fill(table, sys.users.toSortedArray());
+        UI.fill(table, svc.getAll());
     }
 }
