@@ -20,13 +20,14 @@ import java.util.List;
 public class DispatchView extends View {
     private final TableView<Delivery> upcomingTable = UI.table();
     private final TableView<Delivery> historyTable = UI.table();
+    private final DispatchService svc;
     private final ComboBox<String> saleSelect = new ComboBox<>();
     private final ComboBox<String> urgencySelect = new ComboBox<>();
     private final ComboBox<String> dispatchSelect = new ComboBox<>();
     private DatePicker deadlinePicker;
     private TextField vehicle, destination, receivedQty;
 
-    public DispatchView(Ctx ctx) { super(ctx); build(); }
+    public DispatchView(Ctx ctx) { super(ctx); svc = new DispatchService(sys); build(); }
 
     private void build() {
         header("10 - Dispatch & Delivery Monitoring",
@@ -108,22 +109,21 @@ public class DispatchView extends View {
         if (v.isEmpty() || dest.isEmpty()) throw new AgriException("Vehicle and destination are required.");
         String u = urgencySelect.getValue();
         int urgency = u == null ? 2 : Integer.parseInt(u.substring(0, 1));
-        sys.scheduleDelivery(sale, deadline, v, dest, urgency);
+        svc.schedule(sale, deadline, v, dest, urgency);
         vehicle.clear(); destination.clear();
         refreshAll();
     }
 
     private Sale findSale(String ref) {
-        for (Sale s : sys.sales) if (s.ref.equals(ref)) return s;
-        return null;
+        return svc.findSale(ref);
     }
 
     private void recordDispatch() {
-        if (sys.deliveryQueue.isEmpty()) {
+        if (svc.queueEmpty()) {
             UI.info("Nothing scheduled", "There are no scheduled deliveries to dispatch.");
             return;
         }
-        sys.recordDispatch();
+        svc.recordDispatch();
         refreshAll();
     }
 
@@ -134,37 +134,23 @@ public class DispatchView extends View {
         if (d == null) throw new AgriException("Delivery not found.");
         if (!d.status.equals("DISPATCHED")) throw new AgriException("Select a dispatched delivery.");
         double qty = UI.num(receivedQty, "Received Qty");
-        sys.confirmReceipt(d, qty);
+        svc.confirmReceipt(d, qty);
         receivedQty.clear();
         refreshAll();
     }
 
     private Delivery findDelivery(String id) {
-        for (Delivery dl : sys.deliveries) if (dl.id.equals(id)) return dl;
-        return null;
+        return svc.findDelivery(id);
     }
 
     @Override public void refresh() {
-        // Confirmed sales that have no delivery scheduled yet.
-        List<String> refs = new ArrayList<>();
-        for (Sale s : sys.sales) {
-            if (s.status.equals("CONFIRMED") && !s.deliveryScheduled) refs.add(s.ref);
-        }
-        UI.setItems(saleSelect, refs);
-
-        // Deliveries not yet received (eligible for dispatch / receipt).
-        List<String> ids = new ArrayList<>();
-        for (Delivery d : sys.deliveries) {
-            if (!d.status.equals("RECEIVED")) ids.add(d.id);
-        }
-        UI.setItems(dispatchSelect, ids);
+        UI.setItems(saleSelect, svc.eligibleSaleRefs());
+        UI.setItems(dispatchSelect, svc.activeDeliveryIds());
 
         List<Delivery> upcoming = new ArrayList<>();
-        for (Delivery d : sys.getUpcomingDeliveries()) upcoming.add(d);
+        for (Delivery d : svc.upcoming()) upcoming.add(d);
         UI.fill(upcomingTable, upcoming);
 
-        List<Delivery> history = new ArrayList<>();
-        for (Delivery d : sys.deliveries) history.add(d);
-        UI.fill(historyTable, history);
+        UI.fill(historyTable, svc.history());
     }
 }
