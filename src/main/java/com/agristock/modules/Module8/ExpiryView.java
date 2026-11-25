@@ -29,7 +29,7 @@ public class ExpiryView extends View {
 
     private void build() {
         header("8 - Expiry & Purge",
-                "FEFO dispatch: the earliest-expiring batch is used first. Purge expired stock safely.");
+                "Binary Min-Heap ordered by expiry date - FEFO extract-min dispatch and expired-stock purge.");
 
         // ---------- Left panel: FEFO dispatch ----------
         UI.Form fefoF = new UI.Form();

@@ -38,7 +38,7 @@ public class StockView extends View {
 
     private void build() {
         header("7 - Stock Monitoring & Control",
-                "Browse inventory, search stock, and add or adjust stock items.");
+                "AVL Tree - in-order traversal for sorted inventory and binary search by item ID; Min-Heap tracks expiry.");
 
         // Filter defaults are set ONCE here (refresh() must not reset them, or filtering never works).
         categoryFilter.setItems(FXCollections.observableArrayList("All"));

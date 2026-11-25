@@ -32,7 +32,7 @@ public class StorageView extends View {
 
     private void build() {
         header("6 - Storage & Location Management",
-                "Assign harvested batches to storage locations and rotate stock FIFO (oldest lot used first).");
+                "Array of locations + FIFO Queue rotation - the oldest stored lot is moved to the front and re-queued.");
 
         // ---------- Left panel: assign a batch to a location ----------
         UI.Form f = new UI.Form();
