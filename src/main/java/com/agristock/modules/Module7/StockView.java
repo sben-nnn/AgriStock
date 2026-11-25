@@ -19,6 +19,7 @@ import java.util.List;
 // MODULE 7: Stock Monitoring & Control (AVL Tree, in-order traversal, binary search)
 public class StockView extends View {
     private final TableView<StockItem> stockTable = UI.table();
+    private final StockService svc;
     private final TextField search = new TextField();
     private final ComboBox<String> categoryFilter = new ComboBox<>();
     private final ComboBox<String> flagFilter = new ComboBox<>();
@@ -33,7 +34,7 @@ public class StockView extends View {
     private DatePicker editExpiry;
     private TextField editValue;
 
-    public StockView(Ctx ctx) { super(ctx); build(); }
+    public StockView(Ctx ctx) { super(ctx); svc = new StockService(sys); build(); }
 
     private void build() {
         header("7 - Stock Monitoring & Control",
@@ -79,7 +80,7 @@ public class StockView extends View {
                 UI.btn("Save Changes", "secondary", this::editItem),
                 UI.btn("Delete Item", "danger", this::deleteItem)));
         editSelect.valueProperty().addListener((o, a, id) -> {
-            StockItem s = id == null ? null : sys.searchStock(id);
+            StockItem s = id == null ? null : svc.find(id);
             if (s == null) return;
             editCategory.setValue(s.category);
             editExpiry.setValue(s.expiryDate);
@@ -110,7 +111,7 @@ public class StockView extends View {
         UI.col(stockTable, "Available (kg)", s -> String.format("%,.2f", s.available()));
         UI.col(stockTable, "Unit Value", s -> String.format("%,.2f", s.unitValue));
         UI.col(stockTable, "Expiry", s -> s.expiryDate == null ? "-" : s.expiryDate.toString());
-        UI.col(stockTable, "Flags", s -> sys.flagsOf(s));
+        UI.col(stockTable, "Flags", s -> svc.flagsOf(s));
         UI.col(stockTable, "Location", s -> s.location);
 
         VBox tableCard = UI.card(UI.cardTitle("Stock Inventory"), stockTable);
@@ -131,7 +132,7 @@ public class StockView extends View {
         if (c.isEmpty()) throw new AgriException("A crop is required.");
         double qty = UI.num(harvestedQty, "Qty");
         double value = UI.num(unitValue, "Unit Value");
-        sys.addItem(c, category.getValue(), qty, expiryDate.getValue(), value);
+        svc.add(c, category.getValue(), qty, expiryDate.getValue(), value);
         crop.setValue(null); category.setValue(null);
         harvestedQty.clear(); unitValue.clear();
         expiryDate.setValue(LocalDate.now().plusDays(7));
@@ -142,7 +143,7 @@ public class StockView extends View {
         String id = editSelect.getValue();
         if (id == null) throw new AgriException("Select an item to edit.");
         if (editCategory.getValue() == null) throw new AgriException("Select a category.");
-        sys.editItem(id, editCategory.getValue(), editExpiry.getValue(), UI.num(editValue, "Unit Value"));
+        svc.edit(id, editCategory.getValue(), editExpiry.getValue(), UI.num(editValue, "Unit Value"));
         refreshAll();
     }
 
@@ -150,7 +151,7 @@ public class StockView extends View {
         String id = editSelect.getValue();
         if (id == null) throw new AgriException("Select an item to delete.");
         if (!UI.confirm("Delete stock item " + id + "?")) return;
-        sys.deleteItem(id);
+        svc.delete(id);
         editSelect.setValue(null);
         refreshAll();
     }
@@ -159,7 +160,7 @@ public class StockView extends View {
         String id = itemSelect.getValue();
         if (id == null) throw new AgriException("Select an item.");
         double qty = UI.num(reserveQty, "Reserve Qty");
-        sys.reserveManually(id, qty);
+        svc.reserve(id, qty);
         reserveQty.clear();
         refreshAll();
     }
@@ -168,7 +169,7 @@ public class StockView extends View {
         String id = itemSelect.getValue();
         if (id == null) throw new AgriException("Select an item.");
         double qty = UI.num(releaseQty, "Release Qty");
-        sys.releaseManually(id, qty);
+        svc.release(id, qty);
         releaseQty.clear();
         refreshAll();
     }
@@ -177,21 +178,19 @@ public class StockView extends View {
         // Category filter list (keeps the current selection; "All" is always present).
         List<String> cats = new ArrayList<>();
         cats.add("All");
-        for (StockItem s : sys.traverseInventory()) {
+        for (StockItem s : svc.getAll()) {
             if (!cats.contains(s.category)) cats.add(s.category);
         }
         UI.setItems(categoryFilter, cats);
 
         List<String> ids = new ArrayList<>();
-        for (StockItem s : sys.traverseInventory()) ids.add(s.itemId);
+        for (StockItem s : svc.getAll()) ids.add(s.itemId);
         UI.setItems(itemSelect, ids);
         UI.setItems(editSelect, ids);
 
         // Populate crop dropdown from registered crops.
-        List<String> cropNames = new ArrayList<>();
-        for (com.agristock.model.Models.Crop c : sys.crops) cropNames.add(c.name);
-        UI.setItems(crop, cropNames);
+        UI.setItems(crop, svc.cropNames());
 
-        UI.fill(stockTable, sys.filterStock(search.getText(), categoryFilter.getValue(), flagFilter.getValue()));
+        UI.fill(stockTable, svc.filter(search.getText(), categoryFilter.getValue(), flagFilter.getValue()));
     }
 }
