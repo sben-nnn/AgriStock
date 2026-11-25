@@ -49,7 +49,7 @@ public class BatchesView extends View {
 
     private void build() {
         header("3 - Farm, Crop & Batch Registration",
-                "AVL Tree (batches) for O(log n) search; Singly Linked Lists (farms and crops); system-generated IDs.");
+                "AVL Tree (batches) for search; Singly Linked Lists (farms and crops); system-generated IDs.");
 
         // ---- Tab 1: Register Farm (form + list in one tab, nothing blocked) ----
         UI.Form f1 = new UI.Form();
