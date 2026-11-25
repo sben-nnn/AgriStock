@@ -1,37 +1,52 @@
 package com.agristock.modules.Module9;
 
-import com.agristock.model.Models.Sale;
 import com.agristock.ds.DynamicArray;
+import com.agristock.model.Models.Sale;
+import com.agristock.model.Models.StockItem;
+import com.agristock.service.AgriStockSystem;
 
-// Service for managing sales
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+// Service for managing sales. Delegates to the shared system structures
+// (FIFO queue of pending orders and a linked list of confirmed records).
 public class SalesService {
-    private DynamicArray<Sale> sales = new DynamicArray<>();
+    private final AgriStockSystem sys;
 
-    // Add a sale
-    public void add(Sale sale) {
-        sales.add(sale);
+    public SalesService(AgriStockSystem sys) { this.sys = sys; }
+
+    public Sale create(String buyer, String itemId, double qty, double unitPrice) {
+        return sys.createSale(buyer, itemId, qty, unitPrice);
     }
 
-    // Get all sales
-    public DynamicArray<Sale> getAll() {
-        return sales;
+    public int processPending() { return sys.processPendingSales(); }
+
+    public boolean hasPending() { return !sys.pendingSales.isEmpty(); }
+
+    public LocalDate today() { return sys.today(); }
+
+    public DynamicArray<StockItem> allItems() { return sys.traverseInventory(); }
+
+    public List<Sale> pending() {
+        List<Sale> out = new ArrayList<>();
+        for (Sale s : sys.pendingSales) out.add(s);
+        return out;
     }
 
-    // Find sale by reference id
+    public List<Sale> records() {
+        List<Sale> out = new ArrayList<>();
+        for (Sale s : sys.sales) out.add(s);
+        return out;
+    }
+
     public Sale findById(String ref) {
-        for (int i = 0; i < sales.size(); i++) {
-            if (sales.get(i).ref.equals(ref)) {
-                return sales.get(i);
-            }
-        }
+        for (Sale s : sys.sales) if (s.ref.equals(ref)) return s;
         return null;
     }
 
-    // Mark a sale as confirmed
     public void confirm(String ref) {
         Sale s = findById(ref);
-        if (s != null) {
-            s.status = "CONFIRMED";
-        }
+        if (s != null) s.status = "CONFIRMED";
     }
 }

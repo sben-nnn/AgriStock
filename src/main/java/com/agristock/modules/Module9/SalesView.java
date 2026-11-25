@@ -22,11 +22,13 @@ import java.util.List;
 public class SalesView extends View {
     private final TableView<Sale> pendingTable = UI.table();
     private final TableView<Sale> salesTable = UI.table();
+    private final SalesService svc;
     private final ComboBox<String> itemSelect = new ComboBox<>();
     private TextField buyer, saleQty, unitPrice;
 
     public SalesView(Ctx ctx) {
         super(ctx);
+        svc = new SalesService(sys);
         build();
         refresh();
     }
@@ -109,7 +111,7 @@ public class SalesView extends View {
             double qty = UI.num(saleQty, "Qty");
             double price = UI.num(unitPrice, "Unit Price");
 
-            sys.createSale(b, iid, qty, price);
+            svc.create(b, iid, qty, price);
             buyer.clear();
             saleQty.clear();
             unitPrice.clear();
@@ -120,12 +122,12 @@ public class SalesView extends View {
     }
 
     private void processPending() {
-        if (sys.pendingSales.isEmpty()) {
+        if (!svc.hasPending()) {
             UI.info("Nothing pending", "There are no pending sales orders.");
             return;
         }
         try {
-            int n = sys.processPendingSales();
+            int n = svc.processPending();
             UI.info("Processed", "Confirmed " + n + " sale order(s) and released stock.");
             refreshAll();
         } catch (AgriException ex) {
@@ -136,19 +138,14 @@ public class SalesView extends View {
 
     @Override public void refresh() {
         List<String> ids = new ArrayList<>();
-        for (StockItem s : sys.traverseInventory()) {
-            if (s.totalStock() > 0.0001 && s.available() > 0.0001 && !s.expiryDate.isBefore(sys.today())) {
+        for (StockItem s : svc.allItems()) {
+            if (s.totalStock() > 0.0001 && s.available() > 0.0001 && !s.expiryDate.isBefore(svc.today())) {
                 ids.add(s.itemId + " | " + s.crop + " (" + Fmt.kg(s.available()) + " available)");
             }
         }
         UI.setItems(itemSelect, ids);
 
-        List<Sale> pending = new ArrayList<>();
-        for (Sale s : sys.pendingSales) pending.add(s);
-        UI.fill(pendingTable, pending);
-
-        List<Sale> records = new ArrayList<>();
-        for (Sale s : sys.sales) records.add(s);
-        UI.fill(salesTable, records);
+        UI.fill(pendingTable, svc.pending());
+        UI.fill(salesTable, svc.records());
     }
 }
