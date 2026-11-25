@@ -27,7 +27,8 @@ public class HarvestStockView extends View {
     public HarvestStockView(Ctx ctx) { super(ctx); svc = new HarvestStockService(sys); build(); }
 
     private void build() {
-        header("4 - Harvest Stock Recording", "");
+        header("4 - Harvest Stock Recording",
+                "Singly Linked List with linear search by batch ID - one stock record per batch.");
         UI.Form f = new UI.Form();
         f.add("Batch ID", batchSelect);
         harvestedQty = f.text("Harvested Qty (kg)", "e.g. 500");
