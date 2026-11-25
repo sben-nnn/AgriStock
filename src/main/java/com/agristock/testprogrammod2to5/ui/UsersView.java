@@ -17,7 +17,8 @@ public class UsersView extends View {
     public UsersView(Ctx ctx) { super(ctx); build(); }
 
     private void build() {
-        header("1 - User & Role Management", "");
+        header("1 - User & Role Management",
+                "AVL Tree keyed by username for O(log n) lookup; Singly Linked List audit trail; SHA-256 hashing.");
         UI.Form f = new UI.Form();
         username = f.text("Username");
         fullName = f.text("Full name");

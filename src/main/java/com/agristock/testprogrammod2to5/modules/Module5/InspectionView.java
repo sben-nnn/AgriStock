@@ -32,7 +32,7 @@ public class InspectionView extends View {
 
     private void build() {
         header("5 - Quality Inspection & Grading",
-                "Inspect batches in FIFO order (earliest queued batch first) and grade accepted produce.");
+                "FIFO Queue - batches are inspected front-first (earliest queued batch) using enqueue/dequeue.");
 
         // ---------- Left panel: inspect front batch ----------
         UI.Form f = new UI.Form();

@@ -34,7 +34,8 @@ public class BatchesView extends View {
     public BatchesView(Ctx ctx) { super(ctx); build(); }
 
     private void build() {
-        header("3 - Farm, Crop & Batch Registration", "");
+        header("3 - Farm, Crop & Batch Registration",
+                "AVL Tree (batches) for O(log n) search; Singly Linked Lists (farms and crops); system-generated IDs.");
 
         // ---- Tab 1: Register Farm ----
         UI.Form f1 = new UI.Form();
