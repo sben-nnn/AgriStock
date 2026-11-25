@@ -20,6 +20,7 @@ import java.util.List;
 public class StorageView extends View {
     private final TableView<StorageEntry> storeTable = UI.table();
     private final TableView<StockItem> stockTable = UI.table();
+    private final StorageService svc;
     private final ComboBox<String> batchSelect = new ComboBox<>();
     private final ComboBox<String> locationSelect = new ComboBox<>();
     private TextField storageQty;
@@ -27,7 +28,7 @@ public class StorageView extends View {
     private TextField storageConditions;
     private StorageEntry editingEntry;
 
-    public StorageView(Ctx ctx) { super(ctx); build(); }
+    public StorageView(Ctx ctx) { super(ctx); svc = new StorageService(sys); build(); }
 
     private void build() {
         header("6 - Storage & Location Management",
@@ -74,7 +75,8 @@ public class StorageView extends View {
             editingEntry = e;
             batchSelect.setValue(e.batchId);
             int idx = -1;
-            for (int i = 0; i < sys.locations.length; i++) if (sys.locations[i].equals(e.location)) idx = i;
+            String[] locs = svc.locations();
+            for (int i = 0; i < locs.length; i++) if (locs[i].equals(e.location)) idx = i;
             if (idx >= 0) locationSelect.getSelectionModel().select(idx);
             storageQty.setText(String.valueOf(e.qty));
             storageDate.setValue(e.storageDate);
@@ -113,7 +115,7 @@ public class StorageView extends View {
         LocalDate date = storageDate.getValue();
         if (date == null) throw new AgriException("Storage date is required.");
         String conditions = storageConditions.getText();
-        sys.assignLocation(bid, loc, qty, date, conditions);
+        svc.assign(bid, loc, qty, date, conditions);
         clearForm();
         refreshAll();
     }
@@ -134,43 +136,42 @@ public class StorageView extends View {
         double qty = UI.num(storageQty, "Qty");
         LocalDate date = storageDate.getValue();
         if (date == null) throw new AgriException("Storage date is required.");
-        sys.editStorageEntry(editingEntry, loc, qty, date, storageConditions.getText());
+        svc.edit(editingEntry, loc, qty, date, storageConditions.getText());
         clearForm(); refreshAll();
     }
 
     private void deleteEntry() {
         if (editingEntry == null) throw new AgriException("Select a storage entry to delete.");
         if (!UI.confirm("Delete this storage entry for " + editingEntry.batchId + "?")) return;
-        sys.deleteStorageEntry(editingEntry);
+        svc.delete(editingEntry);
         clearForm(); refreshAll();
     }
 
     private void rotateFifo() {
         if (!UI.confirm("Move the oldest stored lot to the front of the FIFO queue?")) return;
-        sys.rotateStockFIFO();
+        svc.rotateFIFO();
         refreshAll();
     }
 
     @Override public void refresh() {
         // Batches that still have stock left to store.
         List<String> ids = new ArrayList<>();
-        for (StockItem s : sys.traverseInventory()) {
-            if (s.remaining > 0.0001) ids.add(s.itemId);
-        }
+        for (StockItem s : svc.eligibleItems()) ids.add(s.itemId);
         if (editingEntry != null && !ids.contains(editingEntry.batchId)) ids.add(editingEntry.batchId);
         UI.setItems(batchSelect, ids);
 
         // Storage locations from the system array.
         List<String> locs = new ArrayList<>();
-        for (int i = 0; i < sys.locations.length; i++) locs.add((i + 1) + ". " + sys.locations[i]);
+        String[] locations = svc.locations();
+        for (int i = 0; i < locations.length; i++) locs.add((i + 1) + ". " + locations[i]);
         if (locationSelect.getItems().isEmpty()) locationSelect.setItems(FXCollections.observableArrayList(locs));
 
         List<StorageEntry> entries = new ArrayList<>();
-        for (StorageEntry e : sys.rotationQueue) entries.add(e);
+        for (StorageEntry e : svc.getAll()) entries.add(e);
         UI.fill(storeTable, entries);
 
         List<StockItem> items = new ArrayList<>();
-        for (StockItem s : sys.traverseInventory()) items.add(s);
+        for (StockItem s : svc.allItems()) items.add(s);
         UI.fill(stockTable, items);
     }
 }

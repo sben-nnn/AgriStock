@@ -1,29 +1,46 @@
 package com.agristock.modules.Module6;
 
-import com.agristock.model.Models.StorageEntry;
 import com.agristock.ds.DynamicArray;
+import com.agristock.model.Models.StorageEntry;
+import com.agristock.model.Models.StockItem;
+import com.agristock.service.AgriStockSystem;
 
-// Service for managing storage entries
+import java.time.LocalDate;
+
+// Service for managing storage entries. Delegates to the shared system structures
+// (array of locations and a FIFO rotation queue).
 public class StorageService {
-    private DynamicArray<StorageEntry> entries = new DynamicArray<>();
+    private final AgriStockSystem sys;
 
-    // Add a storage entry
-    public void add(StorageEntry entry) {
-        entries.add(entry);
+    public StorageService(AgriStockSystem sys) { this.sys = sys; }
+
+    public StorageEntry assign(String itemId, int locationIndex, double qty, LocalDate date, String conditions) {
+        return sys.assignLocation(itemId, locationIndex, qty, date, conditions);
     }
 
-    // Get all storage entries
+    public void edit(StorageEntry e, int locationIndex, double qty, LocalDate date, String conditions) {
+        sys.editStorageEntry(e, locationIndex, qty, date, conditions);
+    }
+
+    public void delete(StorageEntry e) { sys.deleteStorageEntry(e); }
+
+    public StorageEntry rotateFIFO() { return sys.rotateStockFIFO(); }
+
     public DynamicArray<StorageEntry> getAll() {
-        return entries;
+        DynamicArray<StorageEntry> out = new DynamicArray<>();
+        for (StorageEntry e : sys.rotationQueue) out.add(e);
+        return out;
     }
 
-    // Find entry by batch id
-    public StorageEntry findByBatch(String batchId) {
-        for (int i = 0; i < entries.size(); i++) {
-            if (entries.get(i).batchId.equals(batchId)) {
-                return entries.get(i);
-            }
-        }
-        return null;
+    public DynamicArray<StockItem> allItems() { return sys.traverseInventory(); }
+
+    /** Items that still have unstored stock available. */
+    public DynamicArray<StockItem> eligibleItems() {
+        DynamicArray<StockItem> out = new DynamicArray<>();
+        for (StockItem s : sys.traverseInventory())
+            if (s.remaining > 0.0001) out.add(s);
+        return out;
     }
+
+    public String[] locations() { return sys.locations; }
 }
