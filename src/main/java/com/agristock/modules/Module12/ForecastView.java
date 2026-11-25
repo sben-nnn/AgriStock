@@ -27,7 +27,7 @@ public class ForecastView extends View {
     public ForecastView(Ctx ctx) {
         super(ctx);
         svc = new ForecastService(sys);
-        header("12 - Forecasting", "Dynamic Array of yield records + Moving Average over the latest N seasons to project seed requirements.");
+        header("12 - Forecasting", "Enter past harvest yields and let the system average recent seasons to estimate how much seed you will need.");
         crop.setEditable(true);
         UI.Form h = new UI.Form();
         h.add("Crop", crop);

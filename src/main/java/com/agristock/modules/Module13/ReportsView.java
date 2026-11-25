@@ -27,7 +27,7 @@ public class ReportsView extends View {
     public ReportsView(Ctx ctx) {
         super(ctx);
         svc = new ReportsService(sys);
-        header("13 - Reports & Analytics", "Merge Sort and Binary Search (lower/upper bound) on a Dynamic Array for date-range filtering.");
+        header("13 - Reports & Analytics", "Build reports for a date range and get quick insights on revenue, losses, and slow-moving stock.");
         type.getItems().addAll(Arrays.asList("Harvest", "Inventory", "Sales", "Dispatch", "Loss")); type.setValue("Harvest");
         batch.setPromptText("e.g. B-1001"); batch.setPrefWidth(110);
         from.setPromptText("From"); to.setPromptText("To"); from.setPrefWidth(120); to.setPrefWidth(120);

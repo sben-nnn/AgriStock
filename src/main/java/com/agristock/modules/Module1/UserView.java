@@ -21,7 +21,7 @@ public class UserView extends View {
 
     private void build() {
         header("1 - User & Role Management",
-                "AVL Tree keyed by username; Singly Linked List audit trail; SHA-256 password hashing.");
+                "Manage who can use the system. Passwords are stored as secure codes and every change is saved to an activity log.");
         UI.Form f = new UI.Form();
         username = f.text("Username", "e.g. jdoe");
         fullName = f.text("Full name", "e.g. Juan Dela Cruz");

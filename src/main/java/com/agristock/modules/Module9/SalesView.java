@@ -35,7 +35,7 @@ public class SalesView extends View {
 
     private void build() {
         header("9 - Sales & Stock Release",
-                "FIFO Queue of pending sale orders + Singly Linked List of confirmed sales records.");
+                "Create orders for buyers, then confirm them one by one in the order they were placed.");
 
         // ---------- Left panel: create sale ----------
         UI.Form f = new UI.Form();
