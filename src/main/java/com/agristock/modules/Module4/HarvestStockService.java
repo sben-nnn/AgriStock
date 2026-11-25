@@ -1,29 +1,45 @@
 package com.agristock.modules.Module4;
 
-import com.agristock.model.Models.StockRecord;
 import com.agristock.ds.DynamicArray;
+import com.agristock.model.Models.Batch;
+import com.agristock.model.Models.StockRecord;
+import com.agristock.service.AgriStockSystem;
 
-// Service for managing harvest stock records
+import java.util.ArrayList;
+import java.util.List;
+
+// Service for managing harvest stock records. Delegates to the shared system
+// structures (singly linked list with linear search).
 public class HarvestStockService {
-    private DynamicArray<StockRecord> records = new DynamicArray<>();
+    private final AgriStockSystem sys;
 
-    // Add a stock record
-    public void add(StockRecord record) {
-        records.add(record);
+    public HarvestStockService(AgriStockSystem sys) { this.sys = sys; }
+
+    public StockRecord record(String batchId, double harvested, double rejected, String grade,
+                              String ripeness, String rejectReason) {
+        return sys.recordHarvestedStock(batchId, harvested, rejected, grade, ripeness, rejectReason);
     }
 
-    // Get all stock records
+    public void edit(String batchId, double harvested, double rejected, String grade,
+                     String ripeness, String rejectReason) {
+        sys.editStockRecord(batchId, harvested, rejected, grade, ripeness, rejectReason);
+    }
+
+    public void delete(String batchId) { sys.deleteStockRecord(batchId); }
+
+    public StockRecord findByBatch(String batchId) { return sys.findStockRecord(batchId); }
+
     public DynamicArray<StockRecord> getAll() {
-        return records;
+        DynamicArray<StockRecord> out = new DynamicArray<>();
+        for (StockRecord r : sys.stockRecords) out.add(r);
+        return out;
     }
 
-    // Find stock record by batch id
-    public StockRecord findByBatch(String batchId) {
-        for (int i = 0; i < records.size(); i++) {
-            if (records.get(i).batchId.equalsIgnoreCase(batchId)) {
-                return records.get(i);
-            }
-        }
-        return null;
+    /** Batches that still need a harvest stock record. */
+    public List<String> eligibleBatchIds() {
+        List<String> ids = new ArrayList<>();
+        for (Batch b : sys.batches.toSortedArray())
+            if (sys.findStockRecord(b.batchId) == null) ids.add(b.batchId);
+        return ids;
     }
 }
